@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: micromatch_db
+    restart: always
+    environment:
+      POSTGRES_USER: micromatch_user
+      POSTGRES_PASSWORD: micromatch_password
+      POSTGRES_DB: micromatch_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
