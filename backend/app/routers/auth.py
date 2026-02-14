@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -6,6 +7,7 @@ from app.models import User
 from app.schemas.user import UserCreate, LoginRequest, TokenResponse
 from app.utils.security import hash_password, verify_password
 from app.core.auth import create_access_token
+from app.core.dependencies import get_current_user, require_role
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -34,21 +36,32 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(request: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
 
-    user = db.query(User).filter(User.email == request.email).first()
+    user = db.query(User).filter(User.email == form_data.username).first()
 
-    if not user or not verify_password(request.password, user.hashed_password):
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
         )
 
     token_data = {"user_id": user.id, "role": user.role}
-
     access_token = create_access_token(token_data)
 
     return {
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+@router.get("/protected")
+def protected_route(current_user: dict = Depends(get_current_user)):
+    return {"message": "You are authenticated", "user": current_user}
+
+
+@router.get("/admin-only")
+def admin_only(current_user: dict = Depends(require_role("admin"))):
+    return {"message": "Welcome admin"}
