@@ -7,12 +7,15 @@ from app.schemas.user import UserCreate, LoginRequest, TokenResponse
 from app.utils.security import hash_password, verify_password
 from app.core.auth import create_access_token
 from app.core.dependencies import get_current_user, require_role
+from app.schemas.user import UserRole
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", status_code=201)
-def register(user: UserCreate, db: Session = Depends(get_db)):
+def register(
+    user: UserCreate, 
+    db: Session = Depends(get_db)):
 
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
@@ -23,7 +26,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         email=user.email,
         hashed_password=hashed_password,
-        role=user.role,
+        role=user.role
     )
 
     db.add(new_user)
@@ -44,7 +47,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid credentials"
         )
 
-    token_data = {"user_id": user.id, "role": user.role}
+    token_data = {"user_id": user.id, "role": user.role.value}
     access_token = create_access_token(token_data)
 
     return {
@@ -58,5 +61,5 @@ def protected_route(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/admin-only")
-def admin_only(current_user: dict = Depends(require_role("admin"))):
+def admin_only(current_user: dict = Depends(require_role(UserRole.admin))):
     return {"message": "Welcome admin"}

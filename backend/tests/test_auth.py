@@ -4,7 +4,7 @@ def test_register_valid_user(client):
         json={
             "email": "test@example.com",
             "password": "strongpassword",
-            "role": "Student"
+            "role": "student"
         },
     )
 
@@ -20,7 +20,7 @@ def test_register_duplicate_email(client):
         json={
             "email": "duplicate@example.com",
             "password": "password123",
-            "role": "Student"
+            "role": "student"
         },
     )
 
@@ -30,7 +30,7 @@ def test_register_duplicate_email(client):
         json={
             "email": "duplicate@example.com",
             "password": "newpassword",
-            "role": "Student"
+            "role": "student"
         },
     )
 
@@ -42,7 +42,7 @@ def test_login_valid_user(client):
         json={
             "email": "login@example.com",
             "password": "loginpassword",
-            "role": "Student"
+            "role": "student"
         },
     )
 
@@ -64,7 +64,7 @@ def test_login_invalid_password(client):
         json={
             "email": "badlogin@example.com",
             "password": "correctpass",
-            "role": "Student"
+            "role": "student"
         },
     )
 
@@ -85,7 +85,7 @@ def test_role_based_access_control(client):
         json={
             "email": "org@example.com",
             "password": "orgpass",
-            "role": "Organization"
+            "role": "organization"
         },
     )
 
@@ -100,7 +100,7 @@ def test_role_based_access_control(client):
     token = login_response.json()["access_token"]
 
     response = client.get(
-        "/student/profile",
+        "/student",
         headers={"Authorization": f"Bearer {token}"}
     )
 

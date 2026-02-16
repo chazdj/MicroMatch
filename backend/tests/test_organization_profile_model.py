@@ -7,7 +7,7 @@ def test_create_organization_profile(db_session):
     user = User(
         email="org@test.com",
         hashed_password="fakehashed",
-        role="Organization"
+        role="organization"
     )
 
     db_session.add(user)
@@ -35,7 +35,7 @@ def test_organization_user_cannot_have_multiple_profiles(db_session):
     user = User(
         email="dup_org@test.com",
         hashed_password="fakehashed",
-        role="Organization"
+        role="organization"
     )
 
     db_session.add(user)
