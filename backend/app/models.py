@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.sql import func
 from app.database import Base
 from sqlalchemy.orm import relationship
@@ -20,24 +20,41 @@ class User(Base):
         cascade="all, delete"
     )
 
-#     organization_profile = relationship(
-#         "OrganizationProfile", 
-#         back_populates="user",
-#         uselist=False,
-#         cascade="all, delete"
-#     )
+    organization_profile = relationship(
+        "OrganizationProfile", 
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete"
+    )
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
+    
+    university = Column(String, nullable=False) 
+    major = Column(String, nullable=False) 
+    graduation_year = Column(Integer, nullable=False) 
+    
+    # Store skills as a comma‑separated string 
+    skills = Column(String, nullable=True) 
+    
+    bio = Column(Text, nullable=True) 
+
+    # Relationship back to User 
+    user = relationship("User", back_populates="student_profile")
+
+class OrganizationProfile(Base):
+    __tablename__ = "organization_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
 
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
-    major = Column(String, nullable=True)
-    graduation_year = Column(Integer, nullable=True)
-    bio = Column(String, nullable=True)
+    organization_name = Column(String, nullable=False)
+    industry = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    description = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="student_profile")
+    user = relationship("User", back_populates="organization_profile")
