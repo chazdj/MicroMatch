@@ -27,6 +27,12 @@ class User(Base):
         uselist=False,
         cascade="all, delete"
     )
+    
+    projects = relationship(
+        "Project",
+        back_populates="organization",
+        cascade="all, delete"
+    )
 
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
@@ -44,7 +50,9 @@ class StudentProfile(Base):
     bio = Column(Text, nullable=True) 
 
     # Relationship back to User 
-    user = relationship("User", back_populates="student_profile")
+    user = relationship(
+        "User", 
+        back_populates="student_profile")
 
 class OrganizationProfile(Base):
     __tablename__ = "organization_profiles"
@@ -58,4 +66,23 @@ class OrganizationProfile(Base):
     website = Column(String, nullable=True)
     description = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="organization_profile")
+    user = relationship(
+        "User", 
+        back_populates="organization_profile")
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    required_skills = Column(String, nullable=True)  # comma-separated
+    duration = Column(String, nullable=True)         # e.g., "2 weeks"
+    status = Column(String, nullable=False, default="open")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship back to organization user
+    organization = relationship("User", back_populates="projects")
