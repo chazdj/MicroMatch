@@ -100,7 +100,7 @@ def test_role_based_access_control(client):
     token = login_response.json()["access_token"]
 
     response = client.get(
-        "/student",
+        "/student/profile",
         headers={"Authorization": f"Bearer {token}"}
     )
 
