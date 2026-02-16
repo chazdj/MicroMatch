@@ -13,16 +13,16 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    student_profile = relationship(
-        "StudentProfile", 
-        back_populates="user",
-        uselist=False,
-        cascade="all, delete"
-    )
+    # student_profile = relationship(
+    #     "StudentProfile", 
+    #     back_populates="user",
+    #     uselist=False,
+    #     cascade="all, delete"
+    # )
 
-    organization_profile = relationship(
-        "OrganizationProfile", 
-        back_populates="user",
-        uselist=False,
-        cascade="all, delete"
-    )
+    # organization_profile = relationship(
+    #     "OrganizationProfile", 
+    #     back_populates="user",
+    #     uselist=False,
+    #     cascade="all, delete"
+    # )
