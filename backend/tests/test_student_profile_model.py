@@ -18,10 +18,10 @@ def test_create_student_profile(db_session):
     # Create student profile
     profile = StudentProfile(
         user_id=user.id,
-        first_name="Chastidy",
-        last_name="Joanem",
-        major="Computer Science",
-        graduation_year=2026,
+        university="Penn State University", 
+        major="Computer Science", 
+        graduation_year=2026, 
+        skills="Python, FastAPI", 
         bio="Aspiring software engineer"
     )
 
@@ -32,6 +32,11 @@ def test_create_student_profile(db_session):
     assert profile.id is not None
     assert profile.user_id == user.id
     assert profile.user.email == "student@test.com"
+    assert profile.university == "Penn State University" 
+    assert profile.major == "Computer Science" 
+    assert profile.graduation_year == 2026 
+    assert profile.skills == "Python, FastAPI" 
+    assert profile.bio == "Aspiring software engineer"
 
 def test_user_cannot_have_multiple_profiles(db_session):
     user = User(
@@ -43,19 +48,23 @@ def test_user_cannot_have_multiple_profiles(db_session):
     db_session.commit()
     db_session.refresh(user)
 
+    # Create first profile
     profile1 = StudentProfile(
         user_id=user.id,
-        first_name="A",
-        last_name="B"
+        university="PSU", 
+        major="IST", 
+        graduation_year=2025
     )
 
     db_session.add(profile1)
     db_session.commit()
 
+    # Second profile for same user should fail
     profile2 = StudentProfile(
         user_id=user.id,
-        first_name="C",
-        last_name="D"
+        university="Another University", 
+        major="Another Major", 
+        graduation_year=2030
     )
 
     db_session.add(profile2)
