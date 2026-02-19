@@ -6,12 +6,16 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.database import Base, get_db
 
-# Use SQLite in-memory DB for tests
+# ------------------------------------------------------------------
+# Test Database Configuration (SQLite)
+# ------------------------------------------------------------------
+
+# Use SQLite file-based DB for isolated testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    connect_args={"check_same_thread": False},  # Required for SQLite
 )
 
 TestingSessionLocal = sessionmaker(
@@ -20,20 +24,36 @@ TestingSessionLocal = sessionmaker(
     bind=engine
 )
 
-# Override DB dependency
+# ------------------------------------------------------------------
+# Dependency Override
+# ------------------------------------------------------------------
+
 def override_get_db():
+    """
+    Overrides the production get_db dependency
+    so tests use the isolated SQLite database.
+    """
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-
+# Apply override globally for tests
 app.dependency_overrides[get_db] = override_get_db
 
-# Model-level DB session fixture
+
+# ------------------------------------------------------------------
+# Fixtures
+# ------------------------------------------------------------------
+
 @pytest.fixture(scope="function")
 def db_session():
+    """
+    Provides a clean database session for each test.
+
+    Drops and recreates all tables to ensure isolation.
+    """
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
@@ -43,10 +63,13 @@ def db_session():
     finally:
         db.close()
 
-@pytest.fixture(scope="function") 
-def client(): 
-    Base.metadata.drop_all(bind=engine) 
-    Base.metadata.create_all(bind=engine) 
-    
-    with TestClient(app) as c: 
+@pytest.fixture(scope="function")
+def client():
+    """
+    Provides a FastAPI TestClient with a clean database.
+    """
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+    with TestClient(app) as c:
         yield c

@@ -13,7 +13,10 @@ def create_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role("organization"))
 ):
-    # Create the project linked to organization
+    """
+    Creates a new project owned by the authenticated organization.
+    """
+    
     project = Project(
         organization_id=current_user.id,
         **project_data.model_dump()

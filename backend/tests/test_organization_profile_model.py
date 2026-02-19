@@ -3,7 +3,11 @@ from app.models import User, OrganizationProfile
 from sqlalchemy.exc import IntegrityError
 
 def test_create_organization_profile(db_session):
-    # Create organization user
+    """
+    Ensure an organization profile can be created
+    and properly linked to its user.
+    """
+
     user = User(
         email="org@test.com",
         hashed_password="fakehashed",
@@ -14,7 +18,6 @@ def test_create_organization_profile(db_session):
     db_session.commit()
     db_session.refresh(user)
 
-    # Create organization profile
     profile = OrganizationProfile(
         user_id=user.id,
         organization_name="Tech Corp",
@@ -28,10 +31,14 @@ def test_create_organization_profile(db_session):
     db_session.refresh(profile)
 
     assert profile.id is not None
-    assert profile.user_id == user.id
     assert profile.user.email == "org@test.com"
 
 def test_organization_user_cannot_have_multiple_profiles(db_session):
+    """
+    Ensure unique constraint prevents multiple profiles
+    for the same organization user.
+    """
+
     user = User(
         email="dup_org@test.com",
         hashed_password="fakehashed",
@@ -40,13 +47,11 @@ def test_organization_user_cannot_have_multiple_profiles(db_session):
 
     db_session.add(user)
     db_session.commit()
-    db_session.refresh(user)
 
     profile1 = OrganizationProfile(
         user_id=user.id,
         organization_name="First Org"
     )
-
     db_session.add(profile1)
     db_session.commit()
 
@@ -54,7 +59,6 @@ def test_organization_user_cannot_have_multiple_profiles(db_session):
         user_id=user.id,
         organization_name="Second Org"
     )
-
     db_session.add(profile2)
 
     with pytest.raises(IntegrityError):

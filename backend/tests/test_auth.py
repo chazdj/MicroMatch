@@ -1,4 +1,8 @@
 def test_register_valid_user(client):
+    """
+    Ensure a user can register successfully.
+    Password should not be returned in response.
+    """
     response = client.post(
         "/auth/register",
         json={
@@ -14,6 +18,10 @@ def test_register_valid_user(client):
     assert "password" not in data
 
 def test_register_duplicate_email(client):
+    """
+    Ensure duplicate email registration returns 409 Conflict.
+    """
+
     # First registration
     client.post(
         "/auth/register",
@@ -24,7 +32,7 @@ def test_register_duplicate_email(client):
         },
     )
 
-    # Attempt duplicate registration
+    # Duplicate attempt
     response = client.post(
         "/auth/register",
         json={
@@ -37,6 +45,10 @@ def test_register_duplicate_email(client):
     assert response.status_code == 409
 
 def test_login_valid_user(client):
+    """
+    Ensure a registered user can log in and receive a JWT token.
+    """
+
     client.post(
         "/auth/register",
         json={
@@ -55,10 +67,13 @@ def test_login_valid_user(client):
     )
 
     assert response.status_code == 200
-    data = response.json()
-    assert "access_token" in data
+    assert "access_token" in response.json()
 
 def test_login_invalid_password(client):
+    """
+    Ensure login fails with incorrect password.
+    """
+
     client.post(
         "/auth/register",
         json={
@@ -79,7 +94,11 @@ def test_login_invalid_password(client):
     assert response.status_code == 401
 
 def test_role_based_access_control(client):
-    # Register org user
+    """
+    Ensure organization users cannot access student-only endpoints.
+    """
+
+    # Register organization user
     client.post(
         "/auth/register",
         json={
