@@ -64,6 +64,7 @@ def test_search_projects(client, db_session):
         organization_id=org.id,
         title="AI Platform",
         description="Deep learning system",
+        required_skills="python,ml",
         status="open"
     )
 
@@ -71,19 +72,20 @@ def test_search_projects(client, db_session):
         organization_id=org.id,
         title="Web Development",
         description="Frontend React project",
+        required_skills="javascript,react",
         status="open"
     )
 
     db_session.add_all([project1, project2])
     db_session.commit()
 
-    response = client.get("/projects?search=AI")
+    response = client.get("/projects?search=python")
 
     assert response.status_code == 200
     data = response.json()
 
     assert len(data) == 1
-    assert "AI" in data[0]["title"]
+    assert "python" in data[0]["required_skills"]
 
 
 # ---------------------------------------------------------
