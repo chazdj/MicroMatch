@@ -1,0 +1,60 @@
+=== Models Coverage === 
+Name                                  Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------
+app\models.py                            45      0   100%
+app\schemas\organization_profile.py      21      0   100%
+app\schemas\project.py                   16      0   100%
+app\schemas\student_profile.py           20      0   100%
+app\schemas\user.py                      16      0   100%
+-------------------------------------------------------------------
+TOTAL                                   118      0   100%
+=== API Endpoints Coverage === 
+Name                                  Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------
+app\routers\auth.py                      35      2    94%   79, 87
+app\routers\organization_profile.py      41      3    93%   28, 66, 86
+app\routers\projects.py                  29      0   100%
+app\routers\student_profile.py           40      4    90%   26, 48, 66, 88
+-------------------------------------------------------------------
+TOTAL                                   145      9    94%
+=== RBAC Logic Coverage === 
+Name                       Stmts   Miss  Cover   Missing
+--------------------------------------------------------
+app\core\dependencies.py      25      3    88%   26, 34, 43
+app\routers\auth.py           35      2    94%   79, 87
+--------------------------------------------------------
+TOTAL                         60      5    92%
+Name                      Stmts   Miss  Cover   Missing
+-------------------------------------------------------
+app\routers\projects.py      29      0   100%
+-------------------------------------------------------
+TOTAL                        29      0   100%
+=== Overall Backend Coverage === 
+Name                                       Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------
+app\core\auth.py                              20      3    85%   24, 46-48
+app\core\dependencies.py                      25      3    88%   26, 34, 43
+app\database.py                               11      4    64%   21-25
+app\main.py                                   19      1    95%   37
+app\models.py                                 45      0   100%
+app\routers\auth.py                           35      2    94%   79, 87
+app\routers\organization_profile.py           41      3    93%   28, 66, 86
+app\routers\projects.py                       29      0   100%
+app\routers\student_profile.py                40      4    90%   26, 48, 66, 88
+app\schemas\organization_profile.py           21      0   100%
+app\schemas\project.py                        16      0   100%
+app\schemas\student_profile.py                20      0   100%
+app\schemas\user.py                           16      0   100%
+app\utils\security.py                          6      0   100%
+tests\conftest.py                             29      0   100%
+tests\test_auth.py                            25      0   100%
+tests\test_organization_profile.py            58      0   100%
+tests\test_organization_profile_model.py      25      0   100%
+tests\test_project_api.py                     40      0   100%
+tests\test_project_model.py                   25      0   100%
+tests\test_project_retrieval.py               52      0   100%
+tests\test_sprint1_workflow.py                38      0   100%
+tests\test_student_profile.py                 52      0   100%
+tests\test_student_profile_model.py           25      0   100%
+------------------------------------------------------------------------
+TOTAL                                        713     20    97%

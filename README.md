@@ -2,9 +2,16 @@
 
 MicroMatch is a micro-internship marketplace connecting students with short-term professional opportunities.
 
-MicroMatch is a full-stack web application built with React and FastAPI, featuring secure JWT authentication, role-based access control, and containerized PostgreSQL infrastructure.
+It is a full-stack web application built with React and FastAPI, featuring secure JWT authentication, role-based access control, and containerized PostgreSQL infrastructure. The project follows agile sprint methodology and emphasizes scalable architecture and secure backend practices.
 
-The project follows agile sprint methodology and emphasizes scalable architecture and secure backend practices.
+## Features
+
+* **User Authentication:** Registration and login for students, organizations, and admins using JWT.
+* **Role-Based Access Control (RBAC):** Students, organizations, and admins have different permissions.
+* **Project Management:** Organizations can create and manage projects.
+* **Project Discovery:** Students can view and filter projects by required skills.
+* **Frontend Integration:** React frontend connected to FastAPI backend.
+* **End-to-End Workflow:** Full registration → profile creation → project posting → student project browsing.
 
 ## Tech Stack
 
@@ -28,116 +35,100 @@ The project follows agile sprint methodology and emphasizes scalable architectur
 ## Project Structure
 ```bash
 MicroMatch/
-│
 ├── backend/
-│   └── app/
-│       ├── core/
-│       │   ├── auth.py
-│       │   └── dependencies.py
-│       ├── routers/
-│       │   └── auth.py
-│       ├── schemas/
-│       │   └── user.py
-│       ├── utils/
-│       │   └── security.py
-│       ├── database.py
-│       ├── models.py
-│       └── main.py
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   ├── package-lock.json
-│   ├── package.json
-│   └── README.md
-│
-├── README.md
-└── docker-compose.yml
+│   ├── app/
+│   │   ├── core/                # Authentication and dependencies
+│   │   ├── routers/             # API routes (auth, projects, profiles)
+│   │   ├── schemas/             # Pydantic models
+│   │   ├── utils/               # Password hashing & utilities
+│   │   ├── database.py          # Database setup
+│   │   ├── main.py              # FastAPI app
+│   │   └── models.py            # SQLAlchemy models
+│   ├── tests/                   # Unit and integration tests
+│   ├── requirements.txt
+│   └── test.db                  # SQLite test database
+├── frontend/                     # React frontend
+├── docker-compose.yml            # Backend & DB setup
+├── .gitignore
+└── README.md
 ```
 
-## Authentication System
-**Implemented in Sprint 1:**
-* User registration
-* Secure password hashing (bcrypt)
-* OAuth2 password login flow
-* JWT token generation
-* Token expiration handling
-* Protected routes
-* Role-Based Access Control (RBAC)
+## Installation
 
-### Security Highlights
-* Passwords are never stored in plain text
-* JWT tokens include user ID and role
-* Proper 401 vs 403 status handling
-* Database-level uniqueness constraints
-
-## Running the Application
 **1. Clone the Repository**
 ```bash
 git clone https://github.com/chazdj/MicroMatch.git
 cd MicroMatch
 ```
-**2. Start Database with Docker** 
-```bash
-docker-compose up -d
-```
-**3. Set Up Backend Environment**
+**2. Setup Backend Environment**
 ```bash
 cd backend
 python -m venv venv
 source venv/Scripts/activate #Windows
 pip install -r requirements.txt
 ```
-**4. Run Backend**
+
+**3. Setup Frontend Environment**
 ```bash
+cd ../frontend
+npm install
+```
+
+**4. Start PostgreSQL using Docker**
+```bash
+docker-compose up -d
+```
+
+## Running the Application
+
+### Backend
+```bash
+cd backend
 uvicorn app.main:app --reload
 ```
+API will run on `http://127.0.0.1:8000`
 
-Backend runs at:
-
-http://127.0.0.1:8000
-
-
-Swagger API Docs available at:
-
-http://127.0.0.1:8000/docs
-
-**5. Run Frontend**
+### Frontend
 ```bash
 cd frontend
-npm install
-npm run dev
+npm start
+```
+Frontend will run on `http://localhost:3000`
+
+**Login / Registration:**
+* `/login` → User login page
+* `/register` → User registration page
+* `/` → Home/dashboard (protected route)
+
+## Testing & Coverage
+
+### Run tests:
+```bash
+cd backend
+pytest
 ```
 
-Frontend runs at:
+### Run tests with coverage:
+```bash
+coverage run -m pytest tests/
+coverage report -m > coverage_summary.txt
+```
 
-http://localhost:5173
+### Coverage Categories
+* Models
+* API Endpoints
+* RBAC Logic
+* Search & Pagination Logic
+* Overall Backend Coverage
 
-## Authentication Flow
+The results are saved to `coverage_summary.txt`.
 
-1. User registers
-2. User logs in
-3. JWT token returned
-4. Token stored client-side
-5. Protected routes require valid token
-6. Role determines authorization level
+## Usage
+* **Students:** Register → Login → Browse available projects → View project details
 
-## Sprint Progress
+* **Organizations:** Register → Login → Create projects → View posted projects
 
-Sprint 1 Completed:
-
-* Backend architecture
-* Database integration
-* Secure authentication
-* Role-based access control
-* Frontend scaffold setup
-
-Next Sprint:
-
-* Frontend auth UI
-* Protected route logic
-* User profile system
-* Matching feature
+* **Admin: **Access admin-only endpoints and manage users/projects
 
 ## Author
 
