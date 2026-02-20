@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from typing import List
 from app.database import get_db
 from app.models import Project, User
@@ -38,20 +38,32 @@ def get_projects(
 ):
     """
     Retrieve open projects.
-    Supports optional keyword search and pagination.
+    Supports keyword search across title, description,
+    and required_skills with pagination.
     """
 
     query = db.query(Project).filter(Project.status == "open").order_by(Project.created_at.desc())
     
-    # Keyword search (title OR description)
+    # Enhanced search
     if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            or_(
-                Project.title.ilike(search_term),
-                Project.description.ilike(search_term)
+        keywords = search.strip().split()
+
+        search_filters = []
+
+        for keyword in keywords:
+            term = f"%{keyword}%"
+            search_filters.append(
+                or_(
+                    Project.title.ilike(term),
+                    Project.description.ilike(term),
+                    Project.required_skills.ilike(term)
+                )
             )
-        )
+
+        # Match ALL keywords (AND logic)
+        query = query.filter(and_(*search_filters))
+
+    query = query.order_by(Project.created_at.desc())
 
     projects = query.offset(skip).limit(limit).all()
 
