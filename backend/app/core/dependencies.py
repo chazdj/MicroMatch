@@ -60,7 +60,7 @@ def require_role(required_role: str):
         # Handles Enum OR string roles safely
         role_value = getattr(current_user.role, "value", current_user.role)
 
-        # Reject if the user's role does not match the required role
+    
         if role_value.lower() != required_role.lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
