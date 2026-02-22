@@ -41,6 +41,14 @@ class User(Base):
         cascade="all, delete"
     )
 
+    # One-to-many relationship with Applications (student side)
+    applications = relationship(
+        "Application",
+        back_populates="student",
+        cascade="all, delete",
+        foreign_keys="Application.student_id"
+    )
+
 class StudentProfile(Base):
     """
     Represents additional information for student users.
@@ -123,3 +131,48 @@ class Project(Base):
 
     # Relationship back to User (organization)
     organization = relationship("User", back_populates="projects")
+
+    # One-to-many relationship with Applications
+    applications = relationship("Application", back_populates="project", cascade="all, delete")
+
+class Application(Base):
+    """
+    Represents a student applying to a project.
+    """
+
+    __tablename__ = "applications"
+
+    __table_args__ = (
+        UniqueConstraint("student_id", "project_id", name="uq_student_project"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    student_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    status = Column(String, nullable=False, default="pending")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    student = relationship(
+        "User",
+        back_populates="applications",
+        foreign_keys=[student_id]
+    )
+
+    project = relationship(
+        "Project",
+        back_populates="applications"
+    )
