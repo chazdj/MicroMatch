@@ -80,15 +80,3 @@ def reset_dependency_overrides():
     app.dependency_overrides = {get_db: override_get_db} 
     yield 
     app.dependency_overrides = {get_db: override_get_db}
-
-# @pytest.fixture(autouse=True)
-# def clear_dependencies():
-#     """
-#     Clears FastAPI dependency overrides after each test.
-#     Prevents state leakage between tests.
-#     """
-#     app.dependency_overrides = {}
-
-#     yield
-#     # Reset dependency overrides to ensure test isolation
-#     app.dependency_overrides = {}
