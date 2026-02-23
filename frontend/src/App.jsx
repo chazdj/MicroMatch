@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import ProjectsPage from "./pages/ProjectsPage";
 import PrivateRoute from "./components/PrivateRoute";
+import MyApplications from "./pages/MyApplications";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           {/* Protected routes */}
           <Route path="/" element={<PrivateRoute><Home /> </PrivateRoute>} />
           <Route path="/projects" element={<PrivateRoute><ProjectsPage /></PrivateRoute>} />
+          <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>

@@ -19,6 +19,9 @@ export default function Home() {
       <div>
         <Link to="/projects">View Open Projects</Link>
       </div>
+      <div style={{ marginTop: "10px" }}>
+        <Link to="/my-applications">My Applications</Link>
+      </div>
     </div>
   );
 }
