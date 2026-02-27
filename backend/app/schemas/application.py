@@ -19,6 +19,20 @@ class ApplicationCreate(ApplicationBase):
     """
     pass
 
+class ApplicationStatusUpdate(BaseModel):
+    """
+    Schema used for updating the status of an application.
+
+    Valid statuses:
+    - accepted
+    - rejected
+
+    Validation of allowed transitions is handled in the router layer.
+    """
+
+    status: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 class ApplicationRead(BaseModel):
     """
