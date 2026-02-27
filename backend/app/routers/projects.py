@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from typing import List
 from app.database import get_db
-from app.models import Project, User
+from app.models import Project, User, Application, StudentProfile
 from app.schemas.project import ProjectCreate, ProjectRead
+from app.schemas.application import ApplicationWithStudentRead
 from app.core.dependencies import require_role
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
@@ -68,3 +69,65 @@ def get_projects(
     projects = query.offset(skip).limit(limit).all()
 
     return projects
+
+@router.get(
+    "/{project_id}/applications",
+    response_model=List[ApplicationWithStudentRead],
+    status_code=status.HTTP_200_OK
+)
+def get_project_applications(
+    project_id: int,
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("organization"))
+):
+    """
+    Allows an organization to view all student applications
+    submitted to a specific project they own.
+
+    Business Rules:
+    - Only users with role "organization" may access this endpoint.
+    - Project must exist.
+    - Organization must own the project.
+    - Results are paginated using skip and limit.
+    - Returns application metadata and safe student information.
+
+    Raises:
+    - 404 if project not found
+    - 403 if organization does not own project
+    """
+
+    # ---------------------------------------------------------
+    # Validate project exists
+    # ---------------------------------------------------------
+    project = db.query(Project).filter(Project.id == project_id).first()
+
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+
+    # ---------------------------------------------------------
+    # Validate ownership
+    # ---------------------------------------------------------
+    if project.organization_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view these applications"
+        )
+
+    # ---------------------------------------------------------
+    # Query applications with student + profile join
+    # ---------------------------------------------------------
+    applications = (
+        db.query(Application)
+        .filter(Application.project_id == project_id)
+        .order_by(Application.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    return applications

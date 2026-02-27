@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from app.schemas.student_profile import StudentProfileRead
 
 
 class ApplicationBase(BaseModel):
@@ -30,5 +31,35 @@ class ApplicationRead(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class StudentApplicationInfo(BaseModel):
+    """
+    Safe student information exposed to organizations.
+    """
+
+    id: int
+    email: str
+    student_profile: StudentProfileRead | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ApplicationWithStudentRead(BaseModel):
+    """
+    Schema returned when an organization views applications
+    submitted to one of their projects.
+
+    Includes:
+    - Application metadata
+    - Nested student information
+    """
+
+    id: int
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    student: StudentApplicationInfo
 
     model_config = ConfigDict(from_attributes=True)
