@@ -1,20 +1,3 @@
-"""
-Unit and Integration Tests for Organization View Applications Endpoint.
-
-Endpoint Under Test:
-GET /projects/{project_id}/applications
-
-Business Rules Tested:
-- Organization-only access
-- Project ownership validation
-- Pagination support
-- Student information safety
-- Proper response schema
-
-Coverage Target:
->= 95%
-"""
-
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
