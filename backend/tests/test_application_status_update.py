@@ -232,3 +232,23 @@ def test_unauthorized_organization_cannot_update(client):
     )
 
     assert response.status_code == 403
+
+def test_application_not_found(client):
+    """
+    Test updating a non-existent application.
+    """
+
+    db = TestingSessionLocal()
+
+    org_user = create_test_user(db, "org_missing@test.com", "organization")
+
+    # Use a large ID that is unlikely to exist
+    invalid_application_id = 999999
+
+    response = client.patch(
+        f"/applications/{invalid_application_id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org_user)
+    )
+
+    assert response.status_code == 404
