@@ -233,6 +233,38 @@ def test_unauthorized_organization_cannot_update(client):
 
     assert response.status_code == 403
 
+def test_project_ownership_enforced(client):
+    """
+    Organization cannot modify applications for projects they do not own.
+    """
+    db = TestingSessionLocal()
+
+    # Create two organizations
+    owner_org = create_test_user(db, "owner_security@test.com", "organization")
+    intruder_org = create_test_user(db, "intruder_security@test.com", "organization")
+
+    student = create_test_user(db, "student_security@test.com", "student")
+
+    # Project belongs to owner_org
+    project = create_test_project(db, owner_org)
+
+    # Application exists
+    application = create_test_application(
+        db,
+        student,
+        project,
+        status="pending"
+    )
+
+    # Intruder organization attempts update
+    response = client.patch(
+        f"/applications/{application.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(intruder_org)
+    )
+
+    assert response.status_code == 403
+
 def test_application_not_found(client):
     """
     Test updating a non-existent application.
@@ -252,3 +284,58 @@ def test_application_not_found(client):
     )
 
     assert response.status_code == 404
+
+def test_status_transition_lock(client):
+    """
+    Ensure accepted/rejected applications cannot be modified again.
+    """
+    db = TestingSessionLocal()
+
+    org_user = create_test_user(db, "transition_org@test.com", "organization")
+    student = create_test_user(db, "transition_student@test.com", "student")
+
+    project = create_test_project(db, org_user)
+
+    application = create_test_application(
+        db,
+        student,
+        project,
+        status="accepted"
+    )
+
+    response = client.patch(
+        f"/applications/{application.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org_user)
+    )
+
+    assert response.status_code == 400
+
+def test_accept_application_response_schema(client):
+    """
+    Validate response payload structure.
+    """
+    db = TestingSessionLocal()
+
+    org_user = create_test_user(db, "schema_org@test.com", "organization")
+    student = create_test_user(db, "schema_student@test.com", "student")
+
+    project = create_test_project(db, org_user)
+
+    application = create_test_application(
+        db,
+        student,
+        project
+    )
+
+    response = client.patch(
+        f"/applications/{application.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org_user)
+    )
+
+    data = response.json()
+
+    assert "status" in data
+    assert "id" in data
+    assert response.status_code == 200
