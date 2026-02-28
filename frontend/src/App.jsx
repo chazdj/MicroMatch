@@ -7,6 +7,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import PrivateRoute from "./components/PrivateRoute";
 import MyApplications from "./pages/MyApplications";
 import OrganizationApplicationsDashboard from "./pages/OrganizationApplicationDashboard";
+import Layout from "./components/Layout";
 
 function App() {
   return (
@@ -17,10 +18,10 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Protected routes */}
-          <Route path="/" element={<PrivateRoute><Home /> </PrivateRoute>} />
-          <Route path="/projects" element={<PrivateRoute><ProjectsPage /></PrivateRoute>} />
-          <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
-          <Route path="/organization/applications" element={<PrivateRoute><OrganizationApplicationsDashboard /></PrivateRoute>} />
+          <Route path="/" element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
+          <Route path="/projects" element={<PrivateRoute><Layout><ProjectsPage /></Layout></PrivateRoute>} />
+          <Route path="/my-applications" element={<PrivateRoute><Layout><MyApplications /></Layout></PrivateRoute>} />
+          <Route path="/organization/applications" element={<PrivateRoute><Layout><OrganizationApplicationsDashboard /></Layout></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>
