@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import ProjectsPage from "./pages/ProjectsPage";
 import PrivateRoute from "./components/PrivateRoute";
 import MyApplications from "./pages/MyApplications";
+import OrganizationApplicationsDashboard from "./pages/OrganizationApplicationDashboard";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<PrivateRoute><Home /> </PrivateRoute>} />
           <Route path="/projects" element={<PrivateRoute><ProjectsPage /></PrivateRoute>} />
           <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
+          <Route path="/organization/applications" element={<PrivateRoute><OrganizationApplicationsDashboard /></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>
