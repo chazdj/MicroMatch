@@ -3,32 +3,52 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Layout({ children }) {
-  const { email, logout } = useContext(AuthContext);
+  const { email, role, logout, loading } = useContext(AuthContext);
+
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
+
       {/* Navbar */}
       <nav className="bg-white shadow-md px-8 py-4 flex justify-between items-center">
+
         <h1 className="text-xl font-bold text-indigo-600">
           MicroMatch
         </h1>
 
         <div className="space-x-6 flex items-center">
+
+          {/* Common Links */}
           <Link className="hover:text-indigo-600" to="/">
             Dashboard
           </Link>
+
           <Link className="hover:text-indigo-600" to="/projects">
             Projects
           </Link>
-          <Link className="hover:text-indigo-600" to="/my-applications">
-            My Applications
-          </Link>
+
+          {/* Student Only Links */}
+          {role === "student" && (
+            <Link className="hover:text-indigo-600" to="/my-applications">
+              My Applications
+            </Link>
+          )}
+
+          {/* Organization Only Links */}
+          {role === "organization" && (
+            <Link className="hover:text-indigo-600" to="/organization/applications">
+              Applications Dashboard
+            </Link>
+          )}
+
           <button
             onClick={logout}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
           >
             Logout
           </button>
+
         </div>
       </nav>
 
@@ -36,6 +56,7 @@ export default function Layout({ children }) {
       <main className="max-w-6xl mx-auto py-10 px-6">
         {children}
       </main>
+
     </div>
   );
 }

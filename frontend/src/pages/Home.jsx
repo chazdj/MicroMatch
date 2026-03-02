@@ -14,17 +14,6 @@ export default function Home() {
       <h1>Welcome to MicroMatch!</h1>
       <p>Logged in as: <strong>{email}</strong></p>
       <button onClick={logout}>Logout</button>
-    
-      {/* Navigation link to projects page */}
-      <div>
-        <Link to="/projects">View Open Projects</Link>
-      </div>
-      <div style={{ marginTop: "10px" }}>
-        <Link to="/my-applications">My Applications</Link>
-      </div>
-      <div style={{ marginTop: "10px" }}>
-        <Link to="/organization/applications">Organization Applications Dashboard</Link>
-      </div>
     </div>
   );
 }
