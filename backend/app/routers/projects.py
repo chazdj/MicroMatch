@@ -70,11 +70,21 @@ def get_projects(
 
     return projects
 
-@router.get(
-    "/{project_id}/applications",
-    response_model=List[ApplicationWithStudentRead],
-    status_code=status.HTTP_200_OK
-)
+@router.get("/me", response_model=List[ProjectRead])
+def get_my_projects(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("organization"))
+):
+    projects = (
+        db.query(Project)
+        .filter(Project.organization_id == current_user.id)
+        .order_by(Project.created_at.desc())
+        .all()
+    )
+
+    return projects
+
+@router.get("/{project_id}/applications", response_model=List[ApplicationWithStudentRead], status_code=status.HTTP_200_OK)
 def get_project_applications(
     project_id: int,
     skip: int = 0,
