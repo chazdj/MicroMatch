@@ -8,7 +8,11 @@ import { AuthContext } from "../context/AuthContext";
  * Now supports role-based access control by checking user role.
  */
 export default function PrivateRoute({ children, allowedRoles }) {
-  const { token, role } = useContext(AuthContext);
+  const { token, role, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return null;
+  }
 
   if (!token) {
     return <Navigate to="/login" replace />;
