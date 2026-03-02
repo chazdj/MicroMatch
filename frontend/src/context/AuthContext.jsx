@@ -11,14 +11,18 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null); // JWT token
   const [email, setEmail] = useState(null); // User email
+  const [role, setRole] = useState(null); // User role (student or organization)
   const navigate = useNavigate();
 
   // Load token from localStorage when app starts
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedEmail = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+
     if (storedToken) setToken(storedToken);
     if (storedEmail) setEmail(storedEmail);
+    if (storedRole) setRole(storedRole);
   }, []);
 
   /**
@@ -26,11 +30,13 @@ export function AuthProvider({ children }) {
    * @param {string} token JWT token from backend
    * @param {string} email User email
    */
-  const login = (token, email) => {
+  const login = (token, email, role) => {
     setToken(token);
     setEmail(email);
+    setRole(role);
     localStorage.setItem("token", token);
     localStorage.setItem("email", email);
+    localStorage.setItem("role", role);
     navigate("/"); // Redirect to home or dashboard
   };
 
@@ -46,7 +52,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, email, login, logout }}>
+    <AuthContext.Provider value={{ token, email, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

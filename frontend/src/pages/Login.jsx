@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -39,7 +40,8 @@ export default function Login() {
         throw new Error(data.detail || "Login failed");
       }
 
-      login(data.access_token, email);
+      const decoded = jwtDecode(data.access_token);
+      login(data.access_token, email, decoded.role);
     } catch (err) {
       setError(err.message);
     } finally {
