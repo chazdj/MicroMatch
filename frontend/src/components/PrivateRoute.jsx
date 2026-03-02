@@ -5,11 +5,18 @@ import { AuthContext } from "../context/AuthContext";
 /**
  * Wraps a component to restrict access to authenticated users only.
  * Redirects unauthenticated users to login page.
+ * Now supports role-based access control by checking user role.
  */
-export default function PrivateRoute({ children }) {
-  const { token } = useContext(AuthContext);
+export default function PrivateRoute({ children, allowedRoles }) {
+  const { token, role } = useContext(AuthContext);
+
   if (!token) {
     return <Navigate to="/login" replace />;
   }
+
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }

@@ -21,7 +21,7 @@ function App() {
           <Route path="/" element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
           <Route path="/projects" element={<PrivateRoute><Layout><ProjectsPage /></Layout></PrivateRoute>} />
           <Route path="/my-applications" element={<PrivateRoute><Layout><MyApplications /></Layout></PrivateRoute>} />
-          <Route path="/organization/applications" element={<PrivateRoute><Layout><OrganizationApplicationsDashboard /></Layout></PrivateRoute>} />
+          <Route path="/organization/applications" element={<PrivateRoute allowedRoles={["organization"]}><Layout><OrganizationApplicationsDashboard /></Layout></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>
