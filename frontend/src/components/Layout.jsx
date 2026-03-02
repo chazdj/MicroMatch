@@ -37,9 +37,14 @@ export default function Layout({ children }) {
 
           {/* Organization Only Links */}
           {role === "organization" && (
-            <Link className="hover:text-indigo-600" to="/organization/applications">
-              Applications Dashboard
-            </Link>
+            <>
+              <Link className="hover:text-indigo-600" to="/organization/applications">
+                Applications Dashboard
+              </Link>
+              <Link className="hover:text-indigo-600" to="/organization/create-project">
+                Create Project
+              </Link>
+            </>
           )}
 
           <button
