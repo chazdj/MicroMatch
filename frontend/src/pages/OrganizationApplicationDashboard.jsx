@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import api from "../api/api";
 
 export default function OrganizationApplicationsDashboard() {
   const { token, role } = useContext(AuthContext);
@@ -18,7 +18,7 @@ export default function OrganizationApplicationsDashboard() {
   // ----------------------------
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/projects/me", {
+      const res = await api.get("/projects/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -42,7 +42,7 @@ export default function OrganizationApplicationsDashboard() {
     try {
       setLoading(true);
 
-      const res = await axios.get(`http://localhost:8000/projects/${selectedProjectId}/applications`,
+      const res = await api.get(`/projects/${selectedProjectId}/applications`,
         {
           params: {
             skip: page * limit,
@@ -68,7 +68,7 @@ export default function OrganizationApplicationsDashboard() {
     if (!window.confirm(`Confirm ${status}?`)) return;
 
     try {
-      await axios.patch(`http://localhost:8000/applications/${applicationId}/status`,
+      await api.patch(`/applications/${applicationId}/status`,
         { status },
         {
           headers: { Authorization: `Bearer ${token}` },

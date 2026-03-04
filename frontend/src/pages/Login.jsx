@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import api from "../api/api";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -19,35 +20,33 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    setLoading(true);
+  try {
+    const response = await api.post("/auth/login", {
+      email,
+      password,
+    });
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
-      });
+    const decoded = jwtDecode(response.data.access_token);
 
-      const data = await res.json();
+    login(
+      response.data.access_token,
+      email,
+      decoded.role
+    );
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Login failed");
-      }
-
-      const decoded = jwtDecode(data.access_token);
-      login(data.access_token, email, decoded.role);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(
+      err.response?.data?.detail || "Login failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="w-full max-w-md mx-auto p-6 min-h-screen flex items-center justify-center">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import api from "../api/api";
 
 /**
  * ProjectsPage displays all open projects fetched from the backend.
@@ -27,27 +28,22 @@ export default function ProjectsPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("http://127.0.0.1:8000/projects", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/projects");
 
-        if (!response.ok) {
-          throw new Error(`Error fetching projects: ${response.statusText}`);
-        }
+        setProjects(response.data);
 
-        const data = await response.json();
-        setProjects(data);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err.response?.data?.detail ||
+          "Error fetching projects"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, [token]);
+  }, []);
 
   /**
    * Handles applying to a project.
@@ -60,24 +56,17 @@ export default function ProjectsPage() {
       setError(null);
       setSuccessMessage("");
 
-      const response = await fetch("http://127.0.0.1:8000/applications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ project_id: projectId }),
+      await api.post("/applications", {
+        project_id: projectId,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Failed to apply");
-      }
-
       setSuccessMessage("Application submitted successfully!");
+
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.detail ||
+        "Failed to apply"
+      );
     } finally {
       setApplyingProjectId(null);
     }

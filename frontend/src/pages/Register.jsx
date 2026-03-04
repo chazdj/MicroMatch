@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "../components/ui/card";
+import api from "../api/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
@@ -82,30 +77,23 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          role,
-          name: role === "student"
+      await api.post("/auth/register", {
+        email: formData.email,
+        password: formData.password,
+        role,
+        name:
+          role === "student"
             ? formData.name
-            : formData.organizationName
-        })
+            : formData.organizationName,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.detail || "Registration failed");
-      }
-
       navigate("/login");
+
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.detail ||
+        "Registration failed"
+      );
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import api from "../api/api";
 
 export default function CreateProject() {
   const { token } = useContext(AuthContext);
@@ -13,36 +14,33 @@ export default function CreateProject() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  if (loading) return;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          required_skills: requiredSkills || null,
-          duration: duration || null,
-        }),
+      await api.post("/projects", {
+        title,
+        description,
+        required_skills: requiredSkills || null,
+        duration: duration || null,
       });
 
-      const data = await response.json();
+      // Clear form fields
+      setTitle("");
+      setDescription("");
+      setRequiredSkills("");
+      setDuration("");
 
-      if (!response.ok) {
-        throw new Error(data.detail || "Failed to create project");
-      }
-
+      // Redirect
       navigate("/projects");
 
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.detail || "Failed to create project"
+      );
     } finally {
       setLoading(false);
     }

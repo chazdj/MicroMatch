@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-
+import api from "../api/api";
 /**
  * MyApplications page
  *
@@ -27,30 +27,22 @@ export default function MyApplications() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-          "http://127.0.0.1:8000/applications/me",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.get("/applications/me");
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch applications");
-        }
+        setApplications(response.data);
 
-        const data = await response.json();
-        setApplications(data);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err.response?.data?.detail ||
+          "Failed to fetch applications"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchApplications();
-  }, [token]);
+  }, []);
 
   if (loading)
     return <p style={{ textAlign: "center" }}>Loading applications...</p>;
