@@ -176,9 +176,42 @@ def update_application_status(
         )
 
     # ---------------------------------------------------------
-    # Perform update
+    # Enforce single accepted applicant rule
     # ---------------------------------------------------------
-    application.status = new_status
+
+    if new_status == "accepted":
+
+        # Check if project already has an accepted application
+        existing_accepted = db.query(Application).filter(
+            Application.project_id == project.id,
+            Application.status == "accepted"
+        ).first()
+
+        if existing_accepted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A student has already been accepted for this project"
+            )
+
+        # Accept selected application
+        application.status = "accepted"
+
+        # Reject all other pending applications for this project
+        db.query(Application).filter(
+            Application.project_id == project.id,
+            Application.id != application.id,
+            Application.status == "pending"
+        ).update(
+            {"status": "rejected"},
+            synchronize_session=False
+        )
+
+        # Close the project
+        project.status = "closed"
+
+    else:
+        application.status = "rejected"
+
     db.commit()
     db.refresh(application)
 
