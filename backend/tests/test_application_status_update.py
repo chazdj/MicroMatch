@@ -204,7 +204,6 @@ def test_cannot_reupdate_application(client):
 
     assert response.status_code == 400
 
-
 def test_unauthorized_organization_cannot_update(client):
     """
     Organization that does not own project cannot update application.
@@ -339,3 +338,34 @@ def test_accept_application_response_schema(client):
     assert "status" in data
     assert "id" in data
     assert response.status_code == 200
+
+def test_only_one_student_can_be_accepted(client):
+    db = TestingSessionLocal()
+
+    org = create_test_user(db, "org@test.com", "organization")
+
+    student1 = create_test_user(db, "student1@test.com", "student")
+    student2 = create_test_user(db, "student2@test.com", "student")
+
+    project = create_test_project(db, org)
+
+    app1 = create_test_application(db, student1, project)
+    app2 = create_test_application(db, student2, project)
+
+    # Accept first student
+    response1 = client.patch(
+        f"/applications/{app1.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org)
+    )
+
+    assert response1.status_code == 200
+
+    # Try accepting second student
+    response2 = client.patch(
+        f"/applications/{app2.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org)
+    )
+
+    assert response2.status_code == 400
