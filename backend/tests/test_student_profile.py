@@ -91,6 +91,17 @@ def test_get_student_profile(client, student_token, existing_student_profile):
     assert response.status_code == 200
     assert "university" in response.json()
 
+def test_get_student_profile_not_found(client, student_user):
+
+    token = create_access_token({"user_id": student_user.id})
+
+    response = client.get(
+        "/student/profile",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 404
+
 
 def test_update_student_profile(client, student_token, existing_student_profile):
     """
@@ -117,6 +128,16 @@ def test_delete_student_profile(client, student_token, existing_student_profile)
     response = client.delete("/student/profile", headers=headers)
     assert response.status_code == 204
 
+def test_delete_student_profile_not_found(client, student_user):
+
+    token = create_access_token({"user_id": student_user.id})
+
+    response = client.delete(
+        "/student/profile",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 404
 
 def test_role_restriction(client, db_session):
     """

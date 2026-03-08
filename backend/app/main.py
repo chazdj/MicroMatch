@@ -33,7 +33,3 @@ app.include_router(applications.router)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
-
-@app.get("/")
-def read_root():
-    return {"message": "MicroMatch API running"}

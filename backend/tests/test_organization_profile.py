@@ -92,6 +92,20 @@ def test_get_organization_profile(organization_token, existing_organization_prof
     assert response.json()["organization_name"] == "Tech Corp"
 
 # ------------------------------------------------------------------
+# PROFILE NOT FOUND
+# ------------------------------------------------------------------
+def test_get_org_profile_not_found(client, organization_user):
+
+    token = create_access_token({"user_id": organization_user.id})
+
+    response = client.get(
+        "/organization/profile",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 404
+    
+# ------------------------------------------------------------------
 # UPDATE
 # ------------------------------------------------------------------
 

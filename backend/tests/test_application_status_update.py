@@ -149,7 +149,6 @@ def test_reject_application_success(client):
     assert response.status_code == 200
     assert response.json()["status"] == "rejected"
 
-
 def test_invalid_status_rejected(client):
     """
     Test rejection of invalid status value.
@@ -165,7 +164,8 @@ def test_invalid_status_rejected(client):
     application = create_test_application(
         db,
         student_user,
-        project
+        project,
+        status="pending"
     )
 
     response = client.patch(
@@ -176,6 +176,28 @@ def test_invalid_status_rejected(client):
 
     assert response.status_code == 400
 
+def test_cannot_reject_non_pending_application(client):
+    db = TestingSessionLocal()
+
+    org_user = create_test_user(db, "org4@test.com", "organization")
+    student_user = create_test_user(db, "student4@test.com", "student")
+
+    project = create_test_project(db, org_user)
+
+    application = create_test_application(
+        db,
+        student_user,
+        project,
+        status="accepted"
+    )
+
+    response = client.patch(
+        f"/applications/{application.id}/status",
+        json={"status": "rejected"},
+        headers=get_auth_headers(org_user)
+    )
+
+    assert response.status_code == 400
 
 def test_cannot_reupdate_application(client):
     """
@@ -369,3 +391,109 @@ def test_only_one_student_can_be_accepted(client):
     )
 
     assert response2.status_code == 400
+
+def test_student_dashboard_status_sync(client):
+    """
+    TC-US8-03 – Student Dashboard Status Synchronization
+
+    Preconditions:
+    - Student exists
+    - Student applied to project
+    - Status initially pending
+
+    Steps:
+    - Organization accepts application
+    - Student retrieves /applications/me
+
+    Expected:
+    - Status changes pending → accepted
+    """
+
+    db = TestingSessionLocal()
+
+    org = create_test_user(db, "org_sync@test.com", "organization")
+    student = create_test_user(db, "student_sync@test.com", "student")
+
+    project = create_test_project(db, org)
+
+    application = create_test_application(db, student, project)
+
+    # Organization accepts application
+    response = client.patch(
+        f"/applications/{application.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org)
+    )
+
+    assert response.status_code == 200
+
+    # Student retrieves dashboard data
+    response = client.get(
+        "/applications/me",
+        headers=get_auth_headers(student)
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["status"] == "accepted"
+
+# tests/test_auto_reject_logic.py
+
+from tests.test_application_status_update import (
+    create_test_user,
+    create_test_project,
+    create_test_application,
+    get_auth_headers
+)
+from tests.conftest import TestingSessionLocal
+
+
+def test_auto_reject_remaining_pending(client):
+    """
+    TC-US9-07 – Reject Remaining Pending Applications Automatically
+
+    Preconditions:
+    - Multiple students apply
+    - All status = pending
+
+    Steps:
+    - Organization accepts one student
+
+    Expected:
+    - Accepted student → accepted
+    - All other students → rejected
+    """
+
+    db = TestingSessionLocal()
+
+    org = create_test_user(db, "org_auto@test.com", "organization")
+
+    student1 = create_test_user(db, "student_auto1@test.com", "student")
+    student2 = create_test_user(db, "student_auto2@test.com", "student")
+    student3 = create_test_user(db, "student_auto3@test.com", "student")
+
+    project = create_test_project(db, org)
+
+    app1 = create_test_application(db, student1, project)
+    app2 = create_test_application(db, student2, project)
+    app3 = create_test_application(db, student3, project)
+
+    # Accept one application
+    response = client.patch(
+        f"/applications/{app1.id}/status",
+        json={"status": "accepted"},
+        headers=get_auth_headers(org)
+    )
+
+    assert response.status_code == 200
+
+    db.refresh(app1)
+    db.refresh(app2)
+    db.refresh(app3)
+
+    assert app1.status == "accepted"
+    assert app2.status == "rejected"
+    assert app3.status == "rejected"

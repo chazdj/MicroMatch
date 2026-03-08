@@ -124,3 +124,52 @@ def test_role_based_access_control(client):
     )
 
     assert response.status_code == 403
+
+def test_protected_route_success(client, db_session):
+    from app.models import User
+    from app.utils.security import hash_password
+    from app.core.auth import create_access_token
+
+    user = User(
+        email="protected@test.com",
+        hashed_password=hash_password("password123"),
+        role="student"
+    )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = create_access_token({"user_id": user.id})
+
+    response = client.get(
+        "/auth/protected",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 200
+
+
+def test_admin_only_success(client, db_session):
+    from app.models import User
+    from app.utils.security import hash_password
+    from app.core.auth import create_access_token
+
+    admin = User(
+        email="admin@test.com",
+        hashed_password=hash_password("password123"),
+        role="admin"
+    )
+
+    db_session.add(admin)
+    db_session.commit()
+    db_session.refresh(admin)
+
+    token = create_access_token({"user_id": admin.id, "role": "admin"})
+
+    response = client.get(
+        "/auth/admin-only",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 200

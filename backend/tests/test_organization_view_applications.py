@@ -150,7 +150,6 @@ def test_org_view_applications_success(
         assert "student" in application
         assert "email" in application["student"]
 
-
 def test_org_view_applications_not_owner(
     organization_user,
     db_session,
@@ -183,7 +182,6 @@ def test_org_view_applications_not_owner(
 
     assert response.status_code == 403
 
-
 def test_org_view_applications_project_not_found(
     organization_user
 ):
@@ -202,6 +200,21 @@ def test_org_view_applications_project_not_found(
 
     assert response.status_code == 404
 
+def test_project_applications_empty(
+    organization_user,
+    project_owned_by_org
+):
+
+    response = client.get(
+        f"/projects/{project_owned_by_org.id}/applications",
+        headers=get_auth_headers(organization_user)
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert isinstance(data, list)
 
 def test_application_pagination(
     organization_user,
@@ -264,7 +277,6 @@ def test_application_pagination(
 
     # Pagination correctness
     assert len(data) <= 5
-
 
 def test_student_data_privacy_enforcement(
     organization_user,
