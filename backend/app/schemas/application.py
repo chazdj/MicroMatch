@@ -2,14 +2,13 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from app.schemas.student_profile import StudentProfileRead
 
-
 class ApplicationBase(BaseModel):
     """
     Shared attributes for Application models.
     """
 
     project_id: int
-
+    
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -34,6 +33,12 @@ class ApplicationStatusUpdate(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ProjectSummary(BaseModel):
+    id: int
+    title: str
+
+    model_config = ConfigDict(from_attributes=True)
+
 class ApplicationRead(BaseModel):
     """
     Schema returned when retrieving an application.
@@ -45,6 +50,8 @@ class ApplicationRead(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+    project: ProjectSummary | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

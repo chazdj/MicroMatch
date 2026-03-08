@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from typing import List
 from app.database import get_db
@@ -95,10 +95,11 @@ def get_my_applications(
     # ---------------------------------------------------------
     applications = (
         db.query(Application)
+        .options(joinedload(Application.project))
         .filter(Application.student_id == current_user.id)
         .order_by(Application.created_at.desc())
         .all()
-    )
+)
 
     return applications
 
