@@ -18,6 +18,11 @@ export default function MyApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Deliverable state (per application)
+  const [deliverables, setDeliverables] = useState({});
+  const [submitting, setSubmitting] = useState({});
+  const [messages, setMessages] = useState({});
+
   /**
    * Fetch student's applications
    */
@@ -51,26 +56,56 @@ export default function MyApplications() {
     return () => clearInterval(interval);
   }, []);
 
+  // ----------------------------
+  // Submit Deliverable
+  // ----------------------------
+  const handleSubmitDeliverable = async (applicationId) => {
+    const content = deliverables[applicationId];
+
+    if (!content || !content.trim()) {
+      setMessages((prev) => ({
+        ...prev,
+        [applicationId]: { type: "error", text: "Content cannot be empty" },
+      }));
+      return;
+    }
+
+    try {
+      setSubmitting((prev) => ({ ...prev, [applicationId]: true }));
+
+      await api.post(`/applications/${applicationId}/deliverables`, {
+        content,
+      });
+
+      setMessages((prev) => ({
+        ...prev,
+        [applicationId]: { type: "success", text: "Deliverable submitted!" },
+      }));
+
+    } catch (err) {
+      setMessages((prev) => ({
+        ...prev,
+        [applicationId]: {
+          type: "error",
+          text: err.response?.data?.detail || "Submission failed",
+        },
+      }));
+    } finally {
+      setSubmitting((prev) => ({ ...prev, [applicationId]: false }));
+    }
+  };
+
   /**
    * Status badge colors
    */
   const getStatusStyle = (status) => {
     switch (status) {
       case "pending":
-        return {
-          backgroundColor: "#facc15",
-          color: "#000",
-        };
+        return { backgroundColor: "#facc15", color: "#000" };
       case "accepted":
-        return {
-          backgroundColor: "#22c55e",
-          color: "#fff",
-        };
+        return { backgroundColor: "#22c55e", color: "#fff" };
       case "rejected":
-        return {
-          backgroundColor: "#ef4444",
-          color: "#fff",
-        };
+        return { backgroundColor: "#ef4444", color: "#fff" };
       default:
         return {};
     }
@@ -104,15 +139,12 @@ export default function MyApplications() {
                 borderRadius: "10px",
                 padding: "18px",
                 marginBottom: "15px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
               }}
             >
               <p>
-                <strong>Project:</strong> {app.project?.title || "Unknown Project"}
-              </p>
-
-              <p>
-                <strong>Project ID:</strong> {app.project_id}
+                <strong>Project:</strong>{" "}
+                {app.project?.title || "Unknown Project"}
               </p>
 
               <p>
@@ -123,17 +155,71 @@ export default function MyApplications() {
                     padding: "4px 10px",
                     borderRadius: "6px",
                     fontWeight: "bold",
-                    textTransform: "capitalize"
+                    textTransform: "capitalize",
                   }}
                 >
                   {app.status}
                 </span>
               </p>
 
-              <p>
-                <strong>Applied On:</strong>{" "}
-                {new Date(app.created_at).toLocaleString()}
-              </p>
+              {/* ----------------------------
+                  Deliverable Section
+              ---------------------------- */}
+              {app.status === "accepted" && (
+                <div style={{ marginTop: "15px" }}>
+                  <h4>Submit Deliverable</h4>
+
+                  <textarea
+                    placeholder="Paste link, text, or file reference..."
+                    value={deliverables[app.id] || ""}
+                    onChange={(e) =>
+                      setDeliverables((prev) => ({
+                        ...prev,
+                        [app.id]: e.target.value,
+                      }))
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "6px",
+                      border: "1px solid #ccc",
+                      marginBottom: "10px",
+                    }}
+                  />
+
+                  <button
+                    onClick={() => handleSubmitDeliverable(app.id)}
+                    disabled={submitting[app.id]}
+                    style={{
+                      padding: "8px 14px",
+                      backgroundColor: "#4f46e5",
+                      color: "white",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      opacity: submitting[app.id] ? 0.6 : 1,
+                    }}
+                  >
+                    {submitting[app.id]
+                      ? "Submitting..."
+                      : "Submit Deliverable"}
+                  </button>
+
+                  {/* Feedback */}
+                  {messages[app.id] && (
+                    <p
+                      style={{
+                        marginTop: "8px",
+                        color:
+                          messages[app.id].type === "error"
+                            ? "red"
+                            : "green",
+                      }}
+                    >
+                      {messages[app.id].text}
+                    </p>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
