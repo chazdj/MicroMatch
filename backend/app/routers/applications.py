@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from typing import List
 from app.database import get_db
-from app.models import Application, Project, User
+from app.models import Application, Project, User, Deliverable
 from app.schemas.application import ApplicationCreate, ApplicationRead, ApplicationStatusUpdate
+from app.schemas.deliverable import DeliverableCreate, DeliverableRead
 from app.core.dependencies import require_role
 
 router = APIRouter(
@@ -217,3 +218,93 @@ def update_application_status(
     db.refresh(application)
 
     return application
+
+@router.post(
+    "/{application_id}/deliverables",
+    response_model=DeliverableRead,
+    status_code=status.HTTP_201_CREATED
+)
+def submit_deliverable(
+    application_id: int,
+    deliverable_data: DeliverableCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("student"))
+):
+    """
+    Allows a student to submit a deliverable for an accepted application.
+
+    Rules:
+    - Only students
+    - Application must exist
+    - Must belong to current student
+    - Must be accepted
+    - Only one submission allowed
+    - Content cannot be empty
+    """
+
+    # ---------------------------------------------------------
+    # Validate input
+    # ---------------------------------------------------------
+    if not deliverable_data.content or not deliverable_data.content.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deliverable content cannot be empty"
+        )
+
+    # ---------------------------------------------------------
+    # Validate application exists
+    # ---------------------------------------------------------
+    application = db.query(Application).filter(
+        Application.id == application_id
+    ).first()
+
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+
+    # ---------------------------------------------------------
+    # Ensure ownership (student owns application)
+    # ---------------------------------------------------------
+    if application.student_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to submit for this application"
+        )
+
+    # ---------------------------------------------------------
+    # Ensure application is accepted
+    # ---------------------------------------------------------
+    if application.status.lower() != "accepted":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deliverables can only be submitted for accepted applications"
+        )
+
+    # ---------------------------------------------------------
+    # Prevent duplicate submission
+    # ---------------------------------------------------------
+    existing = db.query(Deliverable).filter(
+        Deliverable.application_id == application_id
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deliverable already submitted"
+        )
+
+    # ---------------------------------------------------------
+    # Create deliverable
+    # ---------------------------------------------------------
+    deliverable = Deliverable(
+        application_id=application_id,
+        content=deliverable_data.content
+    )
+
+    db.add(deliverable)
+    db.commit()
+    db.refresh(deliverable)
+
+    return deliverable

@@ -176,3 +176,29 @@ class Application(Base):
         "Project",
         back_populates="applications"
     )
+
+class Deliverable(Base):
+    """
+    Represents a deliverable submitted by a student
+    for an accepted application.
+    """
+
+    __tablename__ = "deliverables"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    application_id = Column(
+        Integer,
+        ForeignKey("applications.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True  # prevents duplicate submissions
+    )
+
+    content = Column(Text, nullable=False)
+
+    status = Column(String, nullable=False, default="submitted")
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship
+    application = relationship("Application")
