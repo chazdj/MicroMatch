@@ -7,6 +7,7 @@ from app.routers import student_profile
 from app.routers import organization_profile
 from app.routers import projects
 from app.routers import applications
+from app.routers import deliverables
 
 app = FastAPI()
 
@@ -30,6 +31,7 @@ app.include_router(student_profile.router)
 app.include_router(organization_profile.router)
 app.include_router(projects.router)
 app.include_router(applications.router)
+app.include_router(deliverables.router)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
