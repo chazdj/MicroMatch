@@ -44,6 +44,9 @@ export default function Layout({ children }) {
               <Link className="hover:text-indigo-600" to="/organization/create-project">
                 Create Project
               </Link>
+              <Link className="hover:text-indigo-600" to="/organization/deliverables">
+                  Deliverables
+              </Link>
             </>
           )}
 

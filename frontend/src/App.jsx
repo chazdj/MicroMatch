@@ -9,6 +9,7 @@ import MyApplications from "./pages/MyApplications";
 import OrganizationApplicationsDashboard from "./pages/OrganizationApplicationDashboard";
 import Layout from "./components/Layout";
 import CreateProject from "./pages/CreateProject";
+import OrgDeliverablesDashboard from "./pages/OrgDeliverablesDashboard";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/my-applications" element={<PrivateRoute allowedRoles={["student"]}><Layout><MyApplications /></Layout></PrivateRoute>} />
           <Route path="/organization/applications" element={<PrivateRoute allowedRoles={["organization"]}><Layout><OrganizationApplicationsDashboard /></Layout></PrivateRoute>} />
           <Route path="/organization/create-project" element={<PrivateRoute allowedRoles={["organization"]}><Layout><CreateProject /></Layout></PrivateRoute>} />
+          <Route path="/organization/deliverables" element={<PrivateRoute allowedRoles={["organization"]}><Layout><OrgDeliverablesDashboard /></Layout></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>

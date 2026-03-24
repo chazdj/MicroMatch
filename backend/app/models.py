@@ -191,14 +191,14 @@ class Deliverable(Base):
         Integer,
         ForeignKey("applications.id", ondelete="CASCADE"),
         nullable=False,
-        unique=True  # prevents duplicate submissions
+        unique=True # prevents duplicate submissions
     )
 
     content = Column(Text, nullable=False)
-
     status = Column(String, nullable=False, default="submitted")
-
+    feedback = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationship
     application = relationship("Application")
