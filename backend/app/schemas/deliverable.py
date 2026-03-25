@@ -8,6 +8,12 @@ class DeliverableReview(BaseModel):
     status: str  # "accepted" or "rejected"
     feedback: str | None = None
 
+class DeliverableStudentInfo(BaseModel):
+    id: int
+    email: str
+
+    model_config = ConfigDict(from_attributes=True)
+
 class DeliverableRead(BaseModel):
     id: int
     application_id: int
@@ -16,5 +22,7 @@ class DeliverableRead(BaseModel):
     feedback: str | None
     created_at: datetime
     reviewed_at: datetime | None
+
+    student: DeliverableStudentInfo | None = None
 
     model_config = ConfigDict(from_attributes=True)

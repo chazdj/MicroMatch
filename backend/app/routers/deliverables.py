@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 
 from app.database import get_db
@@ -95,3 +95,59 @@ def review_deliverable(
     db.refresh(deliverable)
 
     return deliverable
+
+@router.get("/projects/{project_id}", response_model=list[DeliverableRead])
+def get_project_deliverables(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("organization"))
+):
+    """
+    Get all deliverables for a project.
+
+    Rules:
+    - Only organizations
+    - Must own the project
+    """
+
+    # ---------------------------------------------------------
+    # Validate project
+    # ---------------------------------------------------------
+    project = db.query(Project).filter(
+        Project.id == project_id
+    ).first()
+
+    if not project:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    # ---------------------------------------------------------
+    # Ownership check
+    # ---------------------------------------------------------
+    if project.organization_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
+
+    # ---------------------------------------------------------
+    # Get deliverables via applications
+    # ---------------------------------------------------------
+    deliverables = (
+        db.query(Deliverable)
+        .join(Application)
+        .filter(Application.project_id == project_id)
+        .options(joinedload(Deliverable.application)
+                 .joinedload(Application.student)
+                 )
+        .all()
+    )
+    result = []
+
+    for d in deliverables:
+        d.student = d.application.student
+        result.append(d)
+
+    return result

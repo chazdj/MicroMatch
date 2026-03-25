@@ -36,7 +36,7 @@ export default function OrgDeliverablesDashboard() {
       setLoading(true);
 
       const res = await api.get(
-        `/projects/${selectedProjectId}/deliverables`
+        `/deliverables/projects/${selectedProjectId}`
       );
 
       setDeliverables(res.data);
