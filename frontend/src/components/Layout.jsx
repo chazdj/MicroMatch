@@ -11,26 +11,26 @@ export default function Layout({ children }) {
     <div className="min-h-screen bg-gray-50">
 
       {/* Navbar */}
-      <nav className="bg-white shadow-md px-8 py-4 flex justify-between items-center">
+      <nav className="bg-white shadow-md px-8 py-4 flex justify-between items-center border-b border-primaryPale">
 
-        <h1 className="text-xl font-bold text-indigo-600">
+        <h1 className="text-xl font-bold text-primary">
           MicroMatch
         </h1>
 
         <div className="space-x-6 flex items-center">
 
           {/* Common Links */}
-          <Link className="hover:text-indigo-600" to="/">
+          <Link className="hover:text-primary transition" to="/">
             Dashboard
           </Link>
 
-          <Link className="hover:text-indigo-600" to="/projects">
+          <Link className="hover:text-primary transition" to="/projects">
             Projects
           </Link>
 
           {/* Student Only Links */}
           {role === "student" && (
-            <Link className="hover:text-indigo-600" to="/my-applications">
+            <Link className="hover:text-primary transition" to="/my-applications">
               My Applications
             </Link>
           )}
@@ -38,13 +38,13 @@ export default function Layout({ children }) {
           {/* Organization Only Links */}
           {role === "organization" && (
             <>
-              <Link className="hover:text-indigo-600" to="/organization/applications">
+              <Link className="hover:text-primary transition" to="/organization/applications">
                 Applications Dashboard
               </Link>
-              <Link className="hover:text-indigo-600" to="/organization/create-project">
+              <Link className="hover:text-primary transition" to="/organization/create-project">
                 Create Project
               </Link>
-              <Link className="hover:text-indigo-600" to="/organization/deliverables">
+              <Link className="hover:text-primary transition" to="/organization/deliverables">
                   Deliverables
               </Link>
             </>
@@ -52,7 +52,7 @@ export default function Layout({ children }) {
 
           <button
             onClick={logout}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryLight transition"
           >
             Logout
           </button>
