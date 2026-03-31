@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api/api";
+import FeedbackForm from "../components/FeedbackForm";
 
 /**
  * MyApplications page
@@ -10,9 +11,10 @@ import api from "../api/api";
  * - Fetches applications from backend
  * - Auto refreshes every 10 seconds
  * - Color coded status badges
+ * - Deliverable submission for accepted applications
+ * - Feedback form for completed projects
  * - Loading and error handling
  */
-
 export default function MyApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,14 +31,11 @@ export default function MyApplications() {
   const fetchApplications = async () => {
     try {
       setError(null);
-
       const response = await api.get("/applications/me");
-
       setApplications(response.data);
     } catch (err) {
       setError(
-        err.response?.data?.detail ||
-        "Failed to fetch applications"
+        err.response?.data?.detail || "Failed to fetch applications"
       );
     } finally {
       setLoading(false);
@@ -48,11 +47,9 @@ export default function MyApplications() {
    */
   useEffect(() => {
     fetchApplications();
-
     const interval = setInterval(() => {
       fetchApplications();
-    }, 10000); // refresh every 10 seconds
-
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,7 +58,6 @@ export default function MyApplications() {
   // ----------------------------
   const handleSubmitDeliverable = async (applicationId) => {
     const content = deliverables[applicationId];
-
     if (!content || !content.trim()) {
       setMessages((prev) => ({
         ...prev,
@@ -72,16 +68,13 @@ export default function MyApplications() {
 
     try {
       setSubmitting((prev) => ({ ...prev, [applicationId]: true }));
-
       await api.post(`/applications/${applicationId}/deliverables`, {
         content,
       });
-
       setMessages((prev) => ({
         ...prev,
         [applicationId]: { type: "success", text: "Deliverable submitted!" },
       }));
-
     } catch (err) {
       setMessages((prev) => ({
         ...prev,
@@ -111,15 +104,8 @@ export default function MyApplications() {
     }
   };
 
-  if (loading)
-    return <p style={{ textAlign: "center" }}>Loading applications...</p>;
-
-  if (error)
-    return (
-      <p style={{ textAlign: "center", color: "red" }}>
-        {error}
-      </p>
-    );
+  if (loading) return <p style={{ textAlign: "center" }}>Loading applications...</p>;
+  if (error) return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;
 
   return (
     <div style={{ maxWidth: "800px", margin: "50px auto" }}>
@@ -146,7 +132,6 @@ export default function MyApplications() {
                 <strong>Project:</strong>{" "}
                 {app.project?.title || "Unknown Project"}
               </p>
-
               <p>
                 <strong>Status:</strong>{" "}
                 <span
@@ -165,10 +150,9 @@ export default function MyApplications() {
               {/* ----------------------------
                   Deliverable Section
               ---------------------------- */}
-              {app.status === "accepted" && (
+              {app.status === "accepted" && app.project?.status !== "completed" && (
                 <div style={{ marginTop: "15px" }}>
                   <h4>Submit Deliverable</h4>
-
                   <textarea
                     placeholder="Paste link, text, or file reference..."
                     value={deliverables[app.id] || ""}
@@ -186,7 +170,6 @@ export default function MyApplications() {
                       marginBottom: "10px",
                     }}
                   />
-
                   <button
                     onClick={() => handleSubmitDeliverable(app.id)}
                     disabled={submitting[app.id]}
@@ -199,25 +182,43 @@ export default function MyApplications() {
                       opacity: submitting[app.id] ? 0.6 : 1,
                     }}
                   >
-                    {submitting[app.id]
-                      ? "Submitting..."
-                      : "Submit Deliverable"}
+                    {submitting[app.id] ? "Submitting..." : "Submit Deliverable"}
                   </button>
 
-                  {/* Feedback */}
                   {messages[app.id] && (
                     <p
                       style={{
                         marginTop: "8px",
-                        color:
-                          messages[app.id].type === "error"
-                            ? "red"
-                            : "green",
+                        color: messages[app.id].type === "error" ? "red" : "green",
                       }}
                     >
                       {messages[app.id].text}
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* ----------------------------
+                  Feedback Section
+                  Only shown when project is completed
+              ---------------------------- */}
+              {app.project?.status === "completed" && (
+                <div style={{ marginTop: "15px" }}>
+                  <p
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: "#dcfce7",
+                      color: "#15803d",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      fontSize: "0.85rem",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    ✓ Project Completed
+                  </p>
+                  <FeedbackForm projectId={app.project_id} />
                 </div>
               )}
             </li>

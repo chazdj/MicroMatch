@@ -36,7 +36,7 @@ class ApplicationStatusUpdate(BaseModel):
 class ProjectSummary(BaseModel):
     id: int
     title: str
-
+    status: str
     model_config = ConfigDict(from_attributes=True)
 
 class ApplicationRead(BaseModel):

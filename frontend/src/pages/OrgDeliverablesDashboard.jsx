@@ -4,11 +4,11 @@ import api from "../api/api";
 
 export default function OrgDeliverablesDashboard() {
   const { token, role } = useContext(AuthContext);
-
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [deliverables, setDeliverables] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // ----------------------------
   // Fetch org projects
@@ -17,9 +17,9 @@ export default function OrgDeliverablesDashboard() {
     try {
       const res = await api.get("/projects/me");
       setProjects(res.data);
-
       if (res.data.length > 0) {
         setSelectedProjectId(res.data[0].id);
+        setSelectedProject(res.data[0]);
       }
     } catch (err) {
       console.error("Failed to fetch projects", err);
@@ -31,14 +31,9 @@ export default function OrgDeliverablesDashboard() {
   // ----------------------------
   const fetchDeliverables = async () => {
     if (!selectedProjectId) return;
-
     try {
       setLoading(true);
-
-      const res = await api.get(
-        `/deliverables/projects/${selectedProjectId}`
-      );
-
+      const res = await api.get(`/deliverables/projects/${selectedProjectId}`);
       setDeliverables(res.data);
     } catch (err) {
       console.error("Failed to fetch deliverables", err);
@@ -52,18 +47,25 @@ export default function OrgDeliverablesDashboard() {
   // ----------------------------
   const reviewDeliverable = async (id, status) => {
     if (!window.confirm(`Confirm ${status}?`)) return;
-
     try {
-      await api.put(`/deliverables/${id}/review`, {
-        status,
-      });
-
+      await api.put(`/deliverables/${id}/review`, { status });
       fetchDeliverables();
     } catch (err) {
-      alert(
-        err.response?.data?.detail ||
-        "Failed to review deliverable"
-      );
+      alert(err.response?.data?.detail || "Failed to review deliverable");
+    }
+  };
+
+  // ----------------------------
+  // Mark project complete
+  // ----------------------------
+  const handleMarkComplete = async () => {
+    if (!window.confirm("Mark this project as complete? This cannot be undone.")) return;
+    try {
+      await api.put(`/projects/${selectedProjectId}/complete`);
+      alert("Project marked as complete!");
+      fetchProjects();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Could not complete project");
     }
   };
 
@@ -72,7 +74,11 @@ export default function OrgDeliverablesDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchDeliverables();
+    if (selectedProjectId) {
+      const found = projects.find((p) => p.id === parseInt(selectedProjectId));
+      setSelectedProject(found || null);
+      fetchDeliverables();
+    }
   }, [selectedProjectId]);
 
   if (role !== "organization") {
@@ -96,7 +102,6 @@ export default function OrgDeliverablesDashboard() {
         <label className="block text-sm font-medium mb-2 text-gray-600">
           Select Project
         </label>
-
         <select
           value={selectedProjectId || ""}
           onChange={(e) => setSelectedProjectId(e.target.value)}
@@ -104,10 +109,27 @@ export default function OrgDeliverablesDashboard() {
         >
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.title}
+              {p.title} {p.status === "completed" ? "✓ Completed" : ""}
             </option>
           ))}
         </select>
+
+        {/* Mark Project Complete button — only shown if project is not already completed */}
+        {selectedProject && selectedProject.status !== "completed" && (
+          <button
+            onClick={handleMarkComplete}
+            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+          >
+            Mark Project Complete
+          </button>
+        )}
+
+        {/* Completed badge */}
+        {selectedProject?.status === "completed" && (
+          <p className="mt-3 inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+            ✓ This project has been marked complete
+          </p>
+        )}
       </div>
 
       {/* Loading */}
@@ -122,7 +144,7 @@ export default function OrgDeliverablesDashboard() {
         </div>
       )}
 
-      {/* Cards instead of table */}
+      {/* Deliverable Cards */}
       <div className="grid gap-5">
         {deliverables.map((d) => (
           <div
@@ -137,7 +159,6 @@ export default function OrgDeliverablesDashboard() {
                   {d.student?.email || "Unknown"}
                 </p>
               </div>
-
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
                   d.status === "submitted"
@@ -153,30 +174,21 @@ export default function OrgDeliverablesDashboard() {
 
             {/* Content */}
             <div className="mb-4">
-              <p className="text-sm text-gray-500 mb-1">
-                Submission
-              </p>
-              <p className="text-gray-700 whitespace-pre-wrap">
-                {d.content}
-              </p>
+              <p className="text-sm text-gray-500 mb-1">Submission</p>
+              <p className="text-gray-700 whitespace-pre-wrap">{d.content}</p>
             </div>
 
-            {/* Actions */}
-            {d.status === "submitted" && (
+            {/* Review Actions — only if project not yet completed */}
+            {d.status === "submitted" && selectedProject?.status !== "completed" && (
               <div className="flex gap-3">
                 <button
-                  onClick={() =>
-                    reviewDeliverable(d.id, "accepted")
-                  }
+                  onClick={() => reviewDeliverable(d.id, "accepted")}
                   className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryLight transition"
                 >
                   Accept
                 </button>
-
                 <button
-                  onClick={() =>
-                    reviewDeliverable(d.id, "rejected")
-                  }
+                  onClick={() => reviewDeliverable(d.id, "rejected")}
                   className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
                 >
                   Reject
