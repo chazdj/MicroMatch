@@ -9,6 +9,7 @@ from app.routers import projects
 from app.routers import applications
 from app.routers import deliverables
 from app.routers import feedback
+from app.routers import admin
 
 app = FastAPI()
 
@@ -34,6 +35,7 @@ app.include_router(projects.router)
 app.include_router(applications.router)
 app.include_router(deliverables.router)
 app.include_router(feedback.router)
+app.include_router(admin.router)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
