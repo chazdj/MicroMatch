@@ -49,6 +49,8 @@ class User(Base):
         foreign_keys="Application.student_id"
     )
 
+    # One-to-many relationship with Feedback
+    feedbacks = relationship("Feedback", back_populates="user", cascade="all, delete")
 class StudentProfile(Base):
     """
     Represents additional information for student users.
@@ -126,7 +128,6 @@ class Project(Base):
 
     duration = Column(String, nullable=True)
     status = Column(String, nullable=False, default="open")
-
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
@@ -135,6 +136,9 @@ class Project(Base):
 
     # One-to-many relationship with Applications
     applications = relationship("Application", back_populates="project", cascade="all, delete")
+
+    # One-to-many relationship with Feedback
+    feedbacks = relationship("Feedback", back_populates="project", cascade="all, delete")
 
 class Application(Base):
     """
@@ -162,7 +166,6 @@ class Application(Base):
     )
 
     status = Column(String, nullable=False, default="pending")
-
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -203,3 +206,20 @@ class Deliverable(Base):
 
     # Relationship
     application = relationship("Application")
+
+class Feedback(Base):
+    """
+    Represents feedback submitted by a student or org for a completed project.
+    """
+    __tablename__ = "feedback"
+    __table_args__ = (UniqueConstraint("user_id", "project_id", name="uq_user_project_feedback"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    rating = Column(Integer, nullable=False)        # 1–5
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="feedbacks")
+    project = relationship("Project", back_populates="feedbacks")
