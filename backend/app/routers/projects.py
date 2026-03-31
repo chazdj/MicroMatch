@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
+from sqlalchemy.sql import func
+
 from typing import List
 from app.database import get_db
-from app.models import Project, User, Application, StudentProfile
+from app.models import Project, User, Application, StudentProfile, Deliverable
 from app.schemas.project import ProjectCreate, ProjectRead
 from app.schemas.application import ApplicationWithStudentRead
 from app.core.dependencies import require_role
@@ -43,7 +45,7 @@ def get_projects(
     and required_skills with pagination.
     """
 
-    query = db.query(Project).filter(Project.status == "open").order_by(Project.created_at.desc())
+    query = db.query(Project).filter(Project.status.notin_(["disabled"])).filter(Project.status == "open").order_by(Project.created_at.desc())
     
     # Enhanced search
     if search:
@@ -141,3 +143,71 @@ def get_project_applications(
     )
 
     return applications
+
+@router.put("/{project_id}/complete", response_model=ProjectRead)
+def complete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("organization"))
+):
+    """
+    Marks a project as completed by setting its status to "completed"
+    and recording the completion timestamp.
+
+    Business Rules:
+    - Only users with role "organization" may access this endpoint.
+    - Project must exist.
+    - Organization must own the project.
+    - Project must not already be completed.
+
+    Raises:
+    - 404 if project not found
+    - 403 if organization does not own project
+    - 400 if project is already completed
+    """
+
+    # ---------------------------------------------------------
+    # Validate project exists
+    # ---------------------------------------------------------
+    project = db.query(Project).filter(Project.id == project_id).first()
+
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+
+    # ---------------------------------------------------------
+    # Validate ownership
+    # ---------------------------------------------------------
+    if project.organization_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to complete this project"
+        )
+
+    # Guard: must have an accepted deliverable (TC-US12-02)
+    accepted = (
+        db.query(Deliverable)
+        .join(Application)
+        .filter(
+            Application.project_id == project_id,
+            Deliverable.status == "accepted"
+        )
+        .first()
+    )
+    if not accepted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Project cannot be completed until a deliverable has been accepted"
+        )
+    # ---------------------------------------------------------
+    # Mark as completed
+    # ---------------------------------------------------------
+    project.status = "completed"
+    project.completed_at = func.now()
+
+    db.commit()
+    db.refresh(project)
+
+    return project

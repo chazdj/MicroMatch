@@ -128,6 +128,7 @@ class Project(Base):
     status = Column(String, nullable=False, default="open")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)   # NEW #68
 
     # Relationship back to User (organization)
     organization = relationship("User", back_populates="projects")
