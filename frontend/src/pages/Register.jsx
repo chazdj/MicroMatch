@@ -13,6 +13,7 @@ import {
   Lock,
   User,
   Building2,
+  Shield,
   AlertCircle,
   CheckCircle2
 } from "lucide-react";
@@ -84,7 +85,9 @@ export default function Register() {
         name:
           role === "student"
             ? formData.name
-            : formData.organizationName,
+            : role === "organization"
+            ? formData.organizationName
+            : undefined,
       });
 
       navigate("/login");
@@ -175,6 +178,29 @@ export default function Register() {
                     <div className="font-medium">Organization</div>
                     <div className="text-xs text-gray-500">
                       Posting micro-internship opportunities
+                    </div>
+                  </div>
+                </label>
+
+                <label
+                  className={`flex items-center gap-3 border rounded-xl p-4 cursor-pointer transition hover:bg-gray-50 ${
+                    role === "admin" ? "border-red-500 bg-red-50" : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value="admin"
+                    checked={role === "admin"}
+                    onChange={() => setRole("admin")}
+                  />
+
+                  <Shield className="w-4 text-red-600" />
+
+                  <div>
+                    <div className="font-medium">Admin</div>
+                    <div className="text-xs text-gray-500">
+                      Platform administrator
                     </div>
                   </div>
                 </label>

@@ -11,6 +11,8 @@ import Layout from "./components/Layout";
 import CreateProject from "./pages/CreateProject";
 import OrgDeliverablesDashboard from "./pages/OrgDeliverablesDashboard";
 import CompletedProjects from "./pages/CompletedProjects";
+import AdminLogsDashboard from "./pages/AdminLogsDashboard";
+import AdminModerationDashboard from "./pages/AdminModerationDashboard";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="/organization/create-project" element={<PrivateRoute allowedRoles={["organization"]}><Layout><CreateProject /></Layout></PrivateRoute>} />
           <Route path="/organization/deliverables" element={<PrivateRoute allowedRoles={["organization"]}><Layout><OrgDeliverablesDashboard /></Layout></PrivateRoute>} />
           <Route path="/completed-projects" element={<PrivateRoute><Layout><CompletedProjects /></Layout></PrivateRoute>} />
+          <Route path="/admin/logs" element={<PrivateRoute allowedRoles={["admin"]}><Layout><AdminLogsDashboard /></Layout></PrivateRoute>} />
+          <Route path="/admin/moderation" element={<PrivateRoute allowedRoles={["admin"]}><Layout><AdminModerationDashboard /></Layout></PrivateRoute>} />
         </Routes>
       </AuthProvider>
     </Router>

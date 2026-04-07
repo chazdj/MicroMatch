@@ -50,6 +50,19 @@ export default function Layout({ children }) {
             </>
           )}
 
+          {/* Admin Only Links */}
+          {role === "admin" && (
+            <>
+              <Link className="hover:text-primary transition" to="/admin/logs">
+                System Logs
+              </Link>
+              <Link className="hover:text-primary transition" to="/admin/moderation">
+                Moderation
+              </Link>
+            </>
+          )}
+
+
           <button
             onClick={logout}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryLight transition"

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Project, User
+from app.models import Project, User, SystemLog
 from app.schemas.project import ProjectRead
 from app.core.dependencies import require_role
 
@@ -61,3 +61,18 @@ def update_user_status(
     user.is_active = is_active
     db.commit()
     return {"detail": f"User {user_id} is_active set to {is_active}"}
+
+@router.get("/logs")
+def get_system_logs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    return db.query(SystemLog).order_by(SystemLog.timestamp.desc()).limit(500).all()
+
+
+@router.get("/users")
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
+):
+    return db.query(User).order_by(User.created_at.desc()).all()
