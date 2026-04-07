@@ -32,11 +32,14 @@ const handleSubmit = async (e) => {
     });
 
     const decoded = jwtDecode(response.data.access_token);
+    console.log(decoded);
+
 
     login(
       response.data.access_token,
       email,
-      decoded.role
+      decoded.role,
+      decoded.name
     );
 
   } catch (err) {

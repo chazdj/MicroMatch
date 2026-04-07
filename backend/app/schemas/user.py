@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole
+    name: str | None = None
 
 class LoginRequest(BaseModel):
     """

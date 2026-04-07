@@ -36,7 +36,8 @@ def register(
     new_user = User(
         email=user.email,
         hashed_password=hashed_password,
-        role=user.role
+        role=user.role,
+        name=user.name
     )
 
     db.add(new_user)
@@ -63,7 +64,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         )
 
     # Create JWT token with user ID and role
-    token_data = {"user_id": user.id, "role": user.role.value}
+    token_data = {"user_id": user.id, "role": user.role.value, "name": user.name}
     access_token = create_access_token(token_data)
 
     return {

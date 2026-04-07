@@ -1,18 +1,17 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 /**
  * Home page / dashboard shown after login.
  * Displays user email and allows logout.
  */
 export default function Home() {
-  const { email, logout } = useContext(AuthContext);
+  const { name, email, logout } = useContext(AuthContext);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>Welcome to MicroMatch!</h1>
-      <p>Logged in as: <strong>{email}</strong></p>
+      <p>Logged in as: <strong>{name || email}</strong></p>
       <button onClick={logout}>Logout</button>
     </div>
   );

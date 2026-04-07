@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null); // JWT token
   const [email, setEmail] = useState(null); // User email
   const [role, setRole] = useState(null); // User role (student or organization)
+  const [name, setName] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -34,16 +35,32 @@ export function AuthProvider({ children }) {
     const storedToken = localStorage.getItem("token");
     const storedEmail = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
+    const storedName = localStorage.getItem("name");
+
+if (storedToken && !isTokenExpired(storedToken)) {
+  setToken(storedToken);
+  setEmail(storedEmail);
+  setRole(storedRole);
+  setName(storedName);        
+} else {
+  localStorage.removeItem("token");
+  localStorage.removeItem("email");
+  localStorage.removeItem("role");
+  localStorage.removeItem("name");   
+}
+
 
     if (storedToken && !isTokenExpired(storedToken)) {
       setToken(storedToken);
       setEmail(storedEmail);
       setRole(storedRole);
+      setName(storedName);
     } else {
       // If expired or invalid, clear everything
       localStorage.removeItem("token");
       localStorage.removeItem("email");
       localStorage.removeItem("role");
+      localStorage.removeItem("name");
     }
 
     setLoading(false);
@@ -80,13 +97,15 @@ export function AuthProvider({ children }) {
   /**
    * Logs in a user
    */
-  const login = (token, email, role) => {
+  const login = (token, email, role, name) => {
     setToken(token);
     setEmail(email);
     setRole(role);
+    setName(name);
     localStorage.setItem("token", token);
     localStorage.setItem("email", email);
     localStorage.setItem("role", role);
+    localStorage.setItem("name", name ?? "");
     navigate("/"); // Redirect to home or dashboard
   };
 
@@ -97,14 +116,16 @@ export function AuthProvider({ children }) {
     setToken(null);
     setEmail(null);
     setRole(null);
+    setName(null);
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
+    localStorage.removeItem("name");
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ token, email, role, login, logout, loading }}>
+    <AuthContext.Provider value={{ token, email, role, name, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
