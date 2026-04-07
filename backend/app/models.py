@@ -224,3 +224,14 @@ class Feedback(Base):
 
     user = relationship("User", back_populates="feedbacks")
     project = relationship("Project", back_populates="feedbacks")
+
+class SystemLog(Base):
+    __tablename__ = "system_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # nullable for unauthenticated requests
+    role = Column(String, nullable=True)
+    endpoint = Column(String, nullable=False)
+    method = Column(String, nullable=False)
+    status_code = Column(Integer, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

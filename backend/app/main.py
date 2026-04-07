@@ -10,6 +10,7 @@ from app.routers import applications
 from app.routers import deliverables
 from app.routers import feedback
 from app.routers import admin
+from .middleware.logging_middleware import LoggingMiddleware
 
 app = FastAPI()
 
@@ -26,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],  # allow POST, GET, OPTIONS, etc.
     allow_headers=["*"],
 )
+
+app.add_middleware(LoggingMiddleware)
 
 # Register routers
 app.include_router(auth.router)
