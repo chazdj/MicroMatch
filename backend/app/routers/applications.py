@@ -7,6 +7,7 @@ from app.models import Application, Project, User, Deliverable
 from app.schemas.application import ApplicationCreate, ApplicationRead, ApplicationStatusUpdate
 from app.schemas.deliverable import DeliverableCreate, DeliverableRead
 from app.core.dependencies import require_role
+from app.utils.notifications import create_notification
 
 router = APIRouter(
     prefix="/applications",
@@ -213,6 +214,17 @@ def update_application_status(
 
     else:
         application.status = "rejected"
+
+    # ---------------------------------------------------------
+    # Notify the student of the decision
+    # ---------------------------------------------------------
+
+    if new_status == "accepted":
+        message = f"Your application for '{project.title}' has been accepted."
+    else:
+        message = f"Your application for '{project.title}' has been rejected."
+
+    create_notification(db, recipient_id=application.student_id, message=message)
 
     db.commit()
     db.refresh(application)

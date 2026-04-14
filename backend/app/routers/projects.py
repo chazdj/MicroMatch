@@ -9,6 +9,7 @@ from app.models import Project, User, Application, StudentProfile, Deliverable
 from app.schemas.project import ProjectCreate, ProjectRead
 from app.schemas.application import ApplicationWithStudentRead
 from app.core.dependencies import require_role
+from app.utils.notifications import create_notification
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -206,6 +207,21 @@ def complete_project(
     # ---------------------------------------------------------
     project.status = "completed"
     project.completed_at = func.now()
+
+    # ---------------------------------------------------------
+    # Notify all accepted students of project completion
+    # ---------------------------------------------------------
+    accepted_applications = db.query(Application).filter(
+        Application.project_id == project_id,
+        Application.status == "accepted"
+    ).all()
+
+    for app in accepted_applications:
+        create_notification(
+            db,
+            recipient_id=app.student_id,
+            message=f"The project '{project.title}' has been marked complete. Congratulations!"
+        )
 
     db.commit()
     db.refresh(project)

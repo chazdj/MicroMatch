@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models import Deliverable, Application, Project, User
 from app.schemas.deliverable import DeliverableReview, DeliverableRead
 from app.core.dependencies import require_role
+from app.utils.notifications import create_notification
 
 router = APIRouter(
     prefix="/deliverables",
@@ -90,6 +91,15 @@ def review_deliverable(
     deliverable.status = new_status
     deliverable.feedback = review_data.feedback
     deliverable.reviewed_at = datetime.utcnow()
+
+    # ---------------------------------------------------------
+    # Notify the student of the review outcome
+    # ---------------------------------------------------------
+    create_notification(
+        db,
+        recipient_id=application.student_id,
+        message=f"Your deliverable for '{project.title}' has been {new_status}."
+    )
 
     db.commit()
     db.refresh(deliverable)

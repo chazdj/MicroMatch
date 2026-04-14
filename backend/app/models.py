@@ -53,6 +53,10 @@ class User(Base):
 
     # One-to-many relationship with Feedback
     feedbacks = relationship("Feedback", back_populates="user", cascade="all, delete")
+
+    # One-to-many relationship with Notifications
+    notifications = relationship("Notification", back_populates="recipient", cascade="all, delete")
+
 class StudentProfile(Base):
     """
     Represents additional information for student users.
@@ -223,10 +227,14 @@ class Feedback(Base):
     comment = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Relationships
     user = relationship("User", back_populates="feedbacks")
     project = relationship("Project", back_populates="feedbacks")
 
 class SystemLog(Base):
+    """
+    Represents a log entry for system events, such as API requests.
+     Useful for monitoring and debugging."""
     __tablename__ = "system_logs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -236,3 +244,18 @@ class SystemLog(Base):
     method = Column(String, nullable=False)
     status_code = Column(Integer, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+class Notification(Base):
+    """
+    Represents a notification sent to a user, such as application status updates or feedback reminders.
+    """
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    message = Column(String, nullable=False)
+    is_read = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship back to User (recipient)
+    recipient = relationship("User", back_populates="notifications")
