@@ -2,11 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import ProfileDropdown from "./ProfileDropdown";
+import ProfileSetupBanner from "./ProfileSetupBanner";
 import api from "../api/api";
 
 export default function Layout({ children }) {
-  const { email, role, logout, loading } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { email, role, loading } = useContext(AuthContext);
 
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(true);
@@ -134,15 +135,14 @@ export default function Layout({ children }) {
             onMarkRead={handleMarkRead}
           />
 
-          <button
-            onClick={logout}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryLight transition"
-          >
-            Logout
-          </button>
+          {/* Profile Dropdown */}
+          <ProfileDropdown />
 
         </div>
       </nav>
+
+      {/* Profile Setup Banner */}
+      <ProfileSetupBanner />
 
       {/* Page Content */}
       <main className="max-w-6xl mx-auto py-10 px-6">

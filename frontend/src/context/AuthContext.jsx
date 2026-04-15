@@ -1,6 +1,8 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
+import api from "../api/api";
+
 /**
  * AuthContext provides authentication state and actions across the app.
  * - Holds the current user token and email
@@ -15,6 +17,7 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null); // User role (student or organization)
   const [name, setName] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileComplete, setProfileComplete] = useState(null);
 
   const navigate = useNavigate();
 
@@ -25,10 +28,37 @@ export function AuthProvider({ children }) {
     try {
       const decoded = jwtDecode(token);
       return decoded.exp * 1000 < Date.now();
-    } catch (error) {
+    } catch {
+    // } catch (error) {
       return true; // If token is invalid, treat as expired
     }
   };
+
+  /**
+  * Check whether profile exists
+  * Called after login and on mount if already logged in
+  */
+  const checkProfileComplete = useCallback(async (userRole) => {
+    try {
+      if (userRole === "student") {
+        await api.get("/student/profile");
+      } else if (userRole === "organization") {
+        await api.get("/organization/profile");
+      } else {
+        // Admins don't have profiles
+        setProfileComplete(true);
+        return;
+      }
+      setProfileComplete(true);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setProfileComplete(false);
+      } else {
+        // Network error etc — don't block the user
+        setProfileComplete(true);
+      }
+    }
+  }, []);
 
   // Load token from localStorage when app starts
   useEffect(() => {
@@ -36,19 +66,6 @@ export function AuthProvider({ children }) {
     const storedEmail = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
     const storedName = localStorage.getItem("name");
-
-if (storedToken && !isTokenExpired(storedToken)) {
-  setToken(storedToken);
-  setEmail(storedEmail);
-  setRole(storedRole);
-  setName(storedName);        
-} else {
-  localStorage.removeItem("token");
-  localStorage.removeItem("email");
-  localStorage.removeItem("role");
-  localStorage.removeItem("name");   
-}
-
 
     if (storedToken && !isTokenExpired(storedToken)) {
       setToken(storedToken);
@@ -65,6 +82,13 @@ if (storedToken && !isTokenExpired(storedToken)) {
 
     setLoading(false);
   }, []);
+
+  // Once role is known, check profile completeness
+  useEffect(() => {
+    if (role && token) {
+      checkProfileComplete(role);
+    }
+  }, [role, token, checkProfileComplete]);
 
   /**
    * Automatically logout if token becomes expired
@@ -125,7 +149,7 @@ if (storedToken && !isTokenExpired(storedToken)) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, email, role, name, login, logout, loading }}>
+    <AuthContext.Provider value={{ token, email, role, name, login, logout, loading, profileComplete, setProfileComplete, checkProfileComplete}}>
       {children}
     </AuthContext.Provider>
   );

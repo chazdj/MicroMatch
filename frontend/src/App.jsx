@@ -14,6 +14,9 @@ import CompletedProjects from "./pages/CompletedProjects";
 import AdminLogsDashboard from "./pages/AdminLogsDashboard";
 import AdminModerationDashboard from "./pages/AdminModerationDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
+import OrganizationProfilePage from "./pages/OrganizationProfilePage";
+import StudentProfilePage from "./pages/StudentProfilePage";
+
 
 function App() {
   return (
@@ -34,6 +37,8 @@ function App() {
           <Route path="/admin/logs" element={<PrivateRoute allowedRoles={["admin"]}><Layout><AdminLogsDashboard /></Layout></PrivateRoute>} />
           <Route path="/admin/moderation" element={<PrivateRoute allowedRoles={["admin"]}><Layout><AdminModerationDashboard /></Layout></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Layout><NotificationsPage /></Layout></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute allowedRoles={["student"]}><Layout><StudentProfilePage /></Layout></PrivateRoute>} />
+          <Route path="/organization/profile" element={<PrivateRoute allowedRoles={["organization"]}><Layout><OrganizationProfilePage /></Layout></PrivateRoute>} />
 
         </Routes>
       </AuthProvider>
