@@ -90,6 +90,7 @@ export default function StudentProfilePage() {
       });
       setProfile(res.data);
       setMode("view");
+      setProfileComplete(true);
       setSuccessMsg("Profile created successfully!");
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to create profile.");

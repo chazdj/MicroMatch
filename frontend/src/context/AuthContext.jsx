@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import api from "../api/api";
@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
   const [profileComplete, setProfileComplete] = useState(null);
 
   const navigate = useNavigate();
+  const profileChecked = useRef(false); // To prevent multiple profile checks on re-render
 
   /**
    * Checks if JWT token is expired
@@ -85,7 +86,8 @@ export function AuthProvider({ children }) {
 
   // Once role is known, check profile completeness
   useEffect(() => {
-    if (role && token) {
+    if (role && token && !profileChecked.current) {
+      profileChecked.current = true; // Prevent multiple checks
       checkProfileComplete(role);
     }
   }, [role, token, checkProfileComplete]);
@@ -141,6 +143,8 @@ export function AuthProvider({ children }) {
     setEmail(null);
     setRole(null);
     setName(null);
+    setProfileComplete(null);
+    profileChecked.current = false;
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
