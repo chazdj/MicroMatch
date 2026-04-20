@@ -21,7 +21,10 @@ export function CardContent({ className, ...props }) {
 }
 
 export function CardTitle({ className, ...props }) {
-  return <h4 className={cn("text-xl font-semibold", className)} {...props} />;
+  return (
+    // eslint-disable-next-line jsx-a11y/heading-has-content
+    <h4 className={cn("text-xl font-semibold", className)} {...props} />
+  );
 }
 
 export function CardDescription({ className, ...props }) {

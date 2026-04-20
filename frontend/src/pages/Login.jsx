@@ -56,8 +56,8 @@ const handleSubmit = async (e) => {
       <Card className="w-full shadow-xl rounded-2xl">
 
         <CardHeader className="space-y-2">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-2">
-            <LogIn className="w-8 h-8 text-blue-600" />
+          <div className="w-16 h-16 rounded-full bg-primaryBg flex items-center justify-center mb-2">
+            <LogIn className="w-8 h-8 text-primary" />
           </div>
 
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
@@ -121,7 +121,7 @@ const handleSubmit = async (e) => {
             Don’t have an account?{" "}
             <Link
               to="/register"
-              className="text-blue-600 font-medium hover:underline"
+              className="text-primary font-medium hover:underline"
             >
               Register
             </Link>

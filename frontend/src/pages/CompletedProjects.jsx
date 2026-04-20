@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
+import { Link } from "react-router-dom";
 
 export default function CompletedProjects() {
   const [projects, setProjects] = useState([]);
@@ -32,11 +33,9 @@ export default function CompletedProjects() {
               </span>
               <div className="mt-3">
                 
-                  href="/my-applications"
-                  className="text-blue-600 text-sm underline"
-                <a>
+                <Link to="/my-applications" className="text-primary text-sm underline">
                   View Applications & Leave Feedback →
-                </a>
+                </Link>
               </div>
             </li>
           ))}

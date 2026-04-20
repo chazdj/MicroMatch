@@ -15,7 +15,6 @@ import {
   Building2,
   Shield,
   AlertCircle,
-  CheckCircle2
 } from "lucide-react";
 
 export default function Register() {
@@ -107,8 +106,8 @@ export default function Register() {
       <Card className="shadow-xl rounded-2xl">
         <CardHeader>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-              <UserPlus className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primaryBg flex items-center justify-center">
+              <UserPlus className="w-8 h-8 text-primary" />
             </div>
 
             <div>
@@ -149,7 +148,7 @@ export default function Register() {
                     onChange={() => setRole("student")}
                   />
 
-                  <User className="w-4 text-blue-600" />
+                  <User className="w-4 text-green-600" />
 
                   <div>
                     <div className="font-medium">Student</div>
@@ -311,7 +310,7 @@ export default function Register() {
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="text-blue-600 hover:underline font-medium"
+                className="text-primary hover:underline font-medium"
               >
                 Login here
               </Link>

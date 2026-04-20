@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useEffect } from "react";
 import api from "../api/api";
 
 /**
@@ -11,8 +10,6 @@ import api from "../api/api";
  * - Displays loading and error states
  */
 export default function ProjectsPage() {
-  const { token } = useContext(AuthContext);
-
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

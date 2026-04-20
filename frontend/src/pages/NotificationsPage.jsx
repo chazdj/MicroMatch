@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-
 /**
  * NotificationsPage
  *
@@ -13,7 +11,6 @@ import { useNavigate } from "react-router-dom";
  * - onMarkRead: function(id)
  */
 export default function NotificationsPage({ notifications, loading, error, onMarkRead }) {
-  const navigate = useNavigate();
 
   const handleClick = async (notification) => {
     if (!notification.is_read) {

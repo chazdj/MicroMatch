@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
@@ -7,7 +7,7 @@ import ProfileSetupBanner from "./ProfileSetupBanner";
 import api from "../api/api";
 
 export default function Layout({ children }) {
-  const { email, role, loading } = useContext(AuthContext);
+  const { role, loading } = useContext(AuthContext);
 
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(true);
@@ -57,22 +57,6 @@ export default function Layout({ children }) {
   }, []);
 
   if (loading) return null;
-
-  // Inject notification props into children that need them (NotificationsPage)
-  const childrenWithProps = Array.isArray(children)
-    ? children
-    : children?.type?.name === "NotificationsPage"
-    ? {
-        ...children,
-        props: {
-          ...children.props,
-          notifications,
-          loading: notifLoading,
-          error: notifError,
-          onMarkRead: handleMarkRead,
-        },
-      }
-    : children;
 
   return (
     <div className="min-h-screen bg-gray-50">

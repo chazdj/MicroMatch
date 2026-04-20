@@ -54,8 +54,8 @@ export default function FeedbackForm({ projectId, onSubmitted }) {
               onClick={() => setRating(n)}
               className={`w-9 h-9 rounded-full border font-bold text-sm transition
                 ${rating === n
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300 hover:border-primaryLight"
                 }`}
             >
               {n}
@@ -70,7 +70,7 @@ export default function FeedbackForm({ projectId, onSubmitted }) {
           value={comment}
           onChange={e => setComment(e.target.value)}
           rows={3}
-          className="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           placeholder="Share your experience..."
         />
       </div>
@@ -78,7 +78,7 @@ export default function FeedbackForm({ projectId, onSubmitted }) {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+        className="px-4 py-2 bg-primary text-white rounded hover:bg-primaryLight disabled:opacity-50 text-sm font-medium"
       >
         {loading ? "Submitting..." : "Submit Feedback"}
       </button>

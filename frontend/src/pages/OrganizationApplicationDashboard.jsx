@@ -84,10 +84,12 @@ export default function OrganizationApplicationsDashboard() {
 
   useEffect(() => {
     fetchProjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchApplications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId, page]);
 
   if (role !== "organization") {

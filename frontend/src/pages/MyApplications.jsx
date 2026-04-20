@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../api/api";
 import FeedbackForm from "../components/FeedbackForm";
-
+import { Button } from "../components/ui/button";
 /**
  * MyApplications page
  *
@@ -170,20 +170,12 @@ export default function MyApplications() {
                       marginBottom: "10px",
                     }}
                   />
-                  <button
+                  <Button
                     onClick={() => handleSubmitDeliverable(app.id)}
                     disabled={submitting[app.id]}
-                    style={{
-                      padding: "8px 14px",
-                      backgroundColor: "#4f46e5",
-                      color: "white",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      opacity: submitting[app.id] ? 0.6 : 1,
-                    }}
                   >
                     {submitting[app.id] ? "Submitting..." : "Submit Deliverable"}
-                  </button>
+                  </Button>
 
                   {messages[app.id] && (
                     <p

@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import api from "../api/api";
 
 export default function OrgDeliverablesDashboard() {
-  const { token, role } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [deliverables, setDeliverables] = useState([]);
@@ -79,6 +79,7 @@ export default function OrgDeliverablesDashboard() {
       setSelectedProject(found || null);
       fetchDeliverables();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   if (role !== "organization") {
