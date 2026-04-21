@@ -1,5 +1,5 @@
 import { cn } from "./utils";
-// eslint-disable-next-line jsx-a11y/heading-has-content
+
 export function Button({ className, ...props }) {
   return (
     <button
