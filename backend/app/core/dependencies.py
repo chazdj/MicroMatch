@@ -70,3 +70,47 @@ def require_role(required_role: str):
         return current_user
 
     return role_checker
+
+def require_project_participant(project_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> User:
+    """
+    Dependency that enforces project-scoped messaging access.
+    Grants access only if the current user is:
+      - The organization that owns the project, OR
+      - A student with an accepted application to the project
+    Raises:
+      - 404 if project not found
+      - 403 if user is not a participant
+    """
+    from app.models import Project, Application
+
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+
+    role_value = getattr(current_user.role, "value", current_user.role).lower()
+
+    # Organization that owns the project
+    if role_value == "organization" and project.organization_id == current_user.id:
+        return current_user
+
+    # Student with an accepted application
+    if role_value == "student":
+        accepted = (
+            db.query(Application)
+            .filter(
+                Application.project_id == project_id,
+                Application.student_id == current_user.id,
+                Application.status == "accepted"
+            )
+            .first()
+        )
+        if accepted:
+            return current_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You are not a participant in this project"
+    )
