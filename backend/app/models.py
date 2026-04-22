@@ -57,8 +57,6 @@ class User(Base):
     # One-to-many relationship with Notifications
     notifications = relationship("Notification", back_populates="recipient", cascade="all, delete")
 
-    # messages = relationship("Message", back_populates="sender", cascade="all, delete")
-
 class StudentProfile(Base):
     """
     Represents additional information for student users.
@@ -264,36 +262,6 @@ class Notification(Base):
 
     # Relationship back to User (recipient)
     recipient = relationship("User", back_populates="notifications")
-
-# class ProjectMessage(Base):
-#     """
-#     Represents a message sent within the context of a project.
-#     Only the assigned student and the owning organization may send messages.
-#     Conversation history is ordered oldest → newest by created_at + id.
-#     """
-    # __tablename__ = "project_messages"
-
-    # id = Column(Integer, primary_key=True, index=True)
-
-    # project_id = Column(
-    #     Integer,
-    #     ForeignKey("projects.id", ondelete="CASCADE"),
-    #     nullable=False,
-    #     index=True
-    # )
-    # sender_id = Column(
-    #     Integer,
-    #     ForeignKey("users.id", ondelete="CASCADE"),
-    #     nullable=False
-    # )
-
-    # content = Column(Text, nullable=False)
-    # created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # # Relationships
-    # project = relationship("Project", back_populates="messages")
-    # sender = relationship("User")
-
 
 class ProjectMessage(Base):
     """
