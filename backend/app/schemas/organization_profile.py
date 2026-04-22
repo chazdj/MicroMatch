@@ -1,4 +1,4 @@
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, ConfigDict
 from typing import Optional
 
 class OrganizationProfileCreate(BaseModel):
@@ -23,8 +23,8 @@ class OrganizationProfileResponse(BaseModel):
     website: Optional[str] = None
     description: Optional[str] = None
 
-    class Config:
-        orm_mode = True  # Enables reading data from SQLAlchemy ORM models
+    model_config = ConfigDict(from_attributes=True)
+
 
 class OrganizationProfileUpdate(BaseModel):
     """
