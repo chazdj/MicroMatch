@@ -3,12 +3,37 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.models import ProjectMessage, User
+from app.models import *
 from app.schemas.message import MessageCreate, MessageRead
 from app.core.dependencies import require_project_participant
+from app.utils.notifications import create_notification
 
 router = APIRouter(prefix="/projects", tags=["Messages"])
 
+def _get_recipient_id(db: Session, project_id: int, sender_id: int) -> int | None:
+    """
+    Returns the other participant's user_id for notification purposes.
+    - If sender is the org → notify the accepted student
+    - If sender is a student → notify the org
+    """
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        return None
+
+    if project.organization_id == sender_id:
+        # Sender is org → find the accepted student
+        app = (
+            db.query(Application)
+            .filter(
+                Application.project_id == project_id,
+                Application.status == "accepted",
+            )
+            .first()
+        )
+        return app.student_id if app else None
+    else:
+        # Sender is student → notify org
+        return project.organization_id
 
 @router.post(
     "/{project_id}/messages",
@@ -39,6 +64,18 @@ def send_message(
         content=message_data.content
     )
     db.add(message)
+
+    # Notify the other participant
+    recipient_id = _get_recipient_id(db, project_id, current_user.id)
+    if recipient_id:
+        project = db.query(Project).filter(Project.id == project_id).first()
+        preview = message_data.content[:60] + ("…" if len(message_data.content) > 60 else "")
+        create_notification(
+            db,
+            recipient_id=recipient_id,
+            message=f"💬 New message in '{project.title}': {preview}",
+        )
+
     db.commit()
     db.refresh(message)
     return message

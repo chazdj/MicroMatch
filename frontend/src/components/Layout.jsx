@@ -81,9 +81,14 @@ export default function Layout({ children }) {
 
           {/* Student Only Links */}
           {role === "student" && (
-            <Link className="hover:text-primary transition" to="/my-applications">
-              My Applications
-            </Link>
+            <>
+              <Link className="hover:text-primary transition" to="/my-applications">
+                My Applications
+              </Link>
+              <Link className="hover:text-primary transition" to="/messages">
+                Messages
+              </Link>
+            </>
           )}
 
           {/* Organization Only Links */}
@@ -97,6 +102,9 @@ export default function Layout({ children }) {
               </Link>
               <Link className="hover:text-primary transition" to="/organization/deliverables">
                 Deliverables
+              </Link>
+              <Link className="hover:text-primary transition" to="/messages">
+                Messages
               </Link>
             </>
           )}

@@ -172,27 +172,28 @@ export default function OrganizationApplicationsDashboard() {
                   </td>
 
                   <td className="p-3 space-x-2">
-                    {app.status === "pending" && (
-                      <>
-                        <button
-                          className="px-3 py-1 bg-green-600 text-white rounded"
-                          onClick={() =>
-                            updateApplicationStatus(app.id, "accepted")
-                          }
-                        >
-                          Accept
-                        </button>
+                      {/* Accept/Reject buttons for pending applications */}
+                      {app.status === "pending" && (
+                        <>
+                          <button
+                            className="px-3 py-1 bg-green-600 text-white rounded"
+                            onClick={() =>
+                              updateApplicationStatus(app.id, "accepted")
+                            }
+                          >
+                            Accept
+                          </button>
 
-                        <button
-                          className="px-3 py-1 bg-red-600 text-white rounded"
-                          onClick={() =>
-                            updateApplicationStatus(app.id, "rejected")
-                          }
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
+                          <button
+                            className="px-3 py-1 bg-red-600 text-white rounded"
+                            onClick={() =>
+                              updateApplicationStatus(app.id, "rejected")
+                            }
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
                   </td>
                 </tr>
               );
