@@ -13,6 +13,7 @@ from app.routers import admin
 from app.routers import notifications
 from app.routers import recommendations
 from app.routers import messages
+from app.routers import analytics
 from .middleware.logging_middleware import LoggingMiddleware
 
 app = FastAPI()
@@ -45,6 +46,7 @@ app.include_router(admin.router)
 app.include_router(notifications.router)
 app.include_router(recommendations.router)
 app.include_router(messages.router)
+app.include_router(analytics.router)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
