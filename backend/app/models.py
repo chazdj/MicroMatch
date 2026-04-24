@@ -83,6 +83,8 @@ class StudentProfile(Base):
     skills = Column(String, nullable=True)
 
     bio = Column(Text, nullable=True)
+    portfolio_links = Column(Text, nullable=True)
+    badges = Column(Text, nullable=True)   
 
     # Relationship back to User
     user = relationship("User", back_populates="student_profile")

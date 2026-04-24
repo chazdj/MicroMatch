@@ -32,9 +32,29 @@ class StudentProfileUpdate(BaseModel):
     skills: Optional[str] = None
     bio: Optional[str] = None
 
+class StudentProfileEnhance(BaseModel):
+    """
+    Schema for PUT /profiles/student/enhance.
+    All enhancement fields are optional — only provided fields are updated.
+    """
+    portfolio_links: Optional[str] = None   
+
+    model_config = ConfigDict(from_attributes=True)
+
 class StudentProfileRead(StudentProfileBase):
     """
     Schema returned when retrieving a student profile.
+    Includes base fields plus computed enhancement fields.
     """
     id: int
     user_id: int
+
+    # Stored enhancement fields
+    portfolio_links: Optional[str] = None
+    badges: Optional[str] = None
+
+    # Computed fields (injected by the router, not stored directly)
+    completed_projects: Optional[int] = None
+    average_rating: Optional[float] = None
+
+    model_config = ConfigDict(from_attributes=True)

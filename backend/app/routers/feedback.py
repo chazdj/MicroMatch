@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Feedback, Project, User
+from app.utils.badges import award_badges
 from app.schemas.feedback import FeedbackCreate, FeedbackRead
 from app.core.dependencies import get_current_user
 
@@ -49,6 +50,8 @@ def submit_feedback(
         comment=feedback_data.comment
     )
     db.add(feedback)
+    # Recompute badges since rating may have changed badge eligibility
+    award_badges(feedback.user_id, db)
     db.commit()
     db.refresh(feedback)
     return feedback
