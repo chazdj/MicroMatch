@@ -350,9 +350,9 @@ def test_recommendations_top_n_invalid_rejected(client):
 # Determinism
 # ---------------------------------------------------------------------------
 
-def test_recommendations_deterministic(client):
+def test_recommendations_deterministic(client, db_session):
     """Same student, same projects → same ranked order on repeated calls."""
-    db = TestingSessionLocal()
+    db = db_session
     student = create_student(db, "determ@test.com")
     org = create_org(db, "determ_org@test.com")
     create_profile(db, student, skills="python,sql")

@@ -247,11 +247,11 @@ def test_notification_only_sent_to_correct_student(client):
 # TC-US16-06: Notification defaults to unread
 # ---------------------------------------------------------
 
-def test_notification_defaults_to_unread(client):
+def test_notification_defaults_to_unread(client, db_session):
     """
     All newly created notifications must have is_read=False.
     """
-    db = TestingSessionLocal()
+    db = db_session
 
     org = create_user(db, "org_unread@test.com", "organization")
     student = create_user(db, "student_unread@test.com", "student")
