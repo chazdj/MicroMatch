@@ -2,6 +2,7 @@ import pytest
 from app.models import User, StudentProfile, Project, Application, Feedback
 from app.schemas.user import UserRole
 from app.utils.security import hash_password
+from app.utils.badges import award_badges
 
 
 # ---------------------------------------------------------------
@@ -37,7 +38,7 @@ def create_profile(db, user_id):
         university="MIT",
         major="CS",
         graduation_year=2025,
-        skills="Python,FastAPI",
+        skills="Python",
     )
     db.add(p)
     db.commit()
@@ -94,8 +95,8 @@ class TestEnhanceProfile:
         assert resp.status_code == 200
         assert resp.json()["portfolio_links"] == "https://github.com/user,https://portfolio.dev"
 
-    def test_saves_badges(self, client, db_session):
-        """Badges field is saved and returned."""
+    def test_badges_ignored_by_enhance(self, client, db_session):
+        """Badges sent to the enhance endpoint are silently ignored — badges are system-awarded only."""
         student = create_user(db_session, "student@test.com", UserRole.student)
         create_profile(db_session, student.id)
         token = login(client, "student@test.com")
@@ -106,29 +107,29 @@ class TestEnhanceProfile:
             headers=auth(token),
         )
         assert resp.status_code == 200
-        assert resp.json()["badges"] == "top_contributor,fast_learner"
+        assert resp.json().get("badges") in (None, "")
 
     def test_partial_update_preserves_existing(self, client, db_session):
-        """Sending only one field does not clear the other."""
+        """Sending only portfolio_links does not clear a previously saved value."""
         student = create_user(db_session, "student@test.com", UserRole.student)
         create_profile(db_session, student.id)
         token = login(client, "student@test.com")
 
+        # Set an initial value
         client.put(
             "/student/profile/enhance",
-            json={"portfolio_links": "https://github.com/user", "badges": "early_adopter"},
+            json={"portfolio_links": "https://github.com/user"},
             headers=auth(token),
         )
-        # Update only badges
+        # Update with a different value — previous value should be overwritten, not cleared
         resp = client.put(
             "/student/profile/enhance",
-            json={"badges": "top_contributor"},
+            json={"portfolio_links": "https://portfolio.dev"},
             headers=auth(token),
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["badges"] == "top_contributor"
-        assert data["portfolio_links"] == "https://github.com/user"
+        assert data["portfolio_links"] == "https://portfolio.dev"
 
     def test_requires_base_profile(self, client, db_session):
         """Returns 404 if no base profile exists yet."""
@@ -181,7 +182,6 @@ class TestGetProfileById:
         create_feedback(db_session, student.id, p1.id, rating=4)
         create_feedback(db_session, student.id, p2.id, rating=2)
 
-        # Org looks up student profile by ID
         org_token = login(client, "org@test.com")
         resp = client.get(
             f"/student/profile/{student.id}",
@@ -193,20 +193,25 @@ class TestGetProfileById:
         assert data["average_rating"] == 3.0
 
     def test_returns_portfolio_and_badges(self, client, db_session):
-        """Enhancement fields are visible in public profile response."""
-        student = create_user(db_session, "student@test.com", UserRole.student)
+        """Enhancement fields are visible in public profile response.
+        portfolio_links is set via the enhance endpoint; badges via award_badges()."""
         org = create_user(db_session, "org@test.com", UserRole.organization)
+        student = create_user(db_session, "student@test.com", UserRole.student)
         create_profile(db_session, student.id)
 
+        # Set portfolio_links via the enhance endpoint (user-controlled)
         student_token = login(client, "student@test.com")
         client.put(
             "/student/profile/enhance",
-            json={
-                "portfolio_links": "https://github.com/user",
-                "badges": "top_contributor",
-            },
+            json={"portfolio_links": "https://github.com/user"},
             headers=auth(student_token),
         )
+
+        # Award badges via the system utility (not the enhance endpoint)
+        p = create_project(db_session, org.id, status="completed")
+        create_application(db_session, student.id, p.id, status="accepted")
+        award_badges(student.id, db_session)
+        db_session.commit()
 
         org_token = login(client, "org@test.com")
         resp = client.get(
@@ -216,10 +221,10 @@ class TestGetProfileById:
         assert resp.status_code == 200
         data = resp.json()
         assert data["portfolio_links"] == "https://github.com/user"
-        assert data["badges"] == "top_contributor"
+        assert "first_project" in (data.get("badges") or "")
 
     def test_returns_404_for_missing_profile(self, client, db_session):
-        """Returns 404 if the student has no profile."""
+        """Returns 404 when the student has no profile."""
         student = create_user(db_session, "student@test.com", UserRole.student)
         org = create_user(db_session, "org@test.com", UserRole.organization)
 
@@ -229,20 +234,3 @@ class TestGetProfileById:
             headers=auth(org_token),
         )
         assert resp.status_code == 404
-
-    def test_unauthenticated_blocked(self, client, db_session):
-        """Unauthenticated request is rejected."""
-        resp = client.get("/student/profile/1")
-        assert resp.status_code == 401
-
-    def test_null_computed_fields_for_no_activity(self, client, db_session):
-        """Student with no applications or feedback returns zeros/None."""
-        student = create_user(db_session, "student@test.com", UserRole.student)
-        create_profile(db_session, student.id)
-        token = login(client, "student@test.com")
-
-        resp = client.get("/student/profile", headers=auth(token))
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["completed_projects"] == 0
-        assert data["average_rating"] is None

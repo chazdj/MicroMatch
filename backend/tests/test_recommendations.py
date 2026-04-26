@@ -300,30 +300,28 @@ def test_recommendations_excludes_completed_projects(client):
 # top_n query param
 # ---------------------------------------------------------------------------
 
-def test_recommendations_top_n_slices_results(client):
+def test_recommendations_top_n_slices_results(client, db_session):
     """top_n=1 returns only the single best match."""
-    db = TestingSessionLocal()
-    student = create_student(db, "topn@test.com")
-    org = create_org(db, "topn_org@test.com")
-    create_profile(db, student)
+    student = create_student(db_session, "topn@test.com")
+    org = create_org(db_session, "topn_org@test.com")
+    create_profile(db_session, student)
 
     for i in range(5):
-        create_project(db, org, title=f"Project {i}", status="open")
+        create_project(db_session, org, title=f"Project {i}", status="open")
 
     response = client.get("/recommendations?top_n=1", headers=get_auth_headers(student))
     assert response.status_code == 200
     assert len(response.json()) == 1
 
 
-def test_recommendations_top_n_returns_top_ranked(client):
+def test_recommendations_top_n_returns_top_ranked(client, db_session):
     """top_n=2 returns the 2 highest-scoring projects."""
-    db = TestingSessionLocal()
-    student = create_student(db, "topn2@test.com")
-    org = create_org(db, "topn2_org@test.com")
-    create_profile(db, student)
+    student = create_student(db_session, "topn2@test.com")
+    org = create_org(db_session, "topn2_org@test.com")
+    create_profile(db_session, student)
 
     for i in range(5):
-        create_project(db, org, title=f"Project {i}", status="open")
+        create_project(db_session, org, title=f"Project {i}", status="open")
 
     all_response = client.get("/recommendations", headers=get_auth_headers(student))
     top2_response = client.get("/recommendations?top_n=2", headers=get_auth_headers(student))
@@ -336,11 +334,10 @@ def test_recommendations_top_n_returns_top_ranked(client):
     assert top2_data[1]["project_id"] == all_data[1]["project_id"]
 
 
-def test_recommendations_top_n_invalid_rejected(client):
+def test_recommendations_top_n_invalid_rejected(client, db_session):
     """top_n=0 is rejected — must be >= 1."""
-    db = TestingSessionLocal()
-    student = create_student(db, "topninvalid@test.com")
-    create_profile(db, student)
+    student = create_student(db_session, "topninvalid@test.com")
+    create_profile(db_session, student)
 
     response = client.get("/recommendations?top_n=0", headers=get_auth_headers(student))
     assert response.status_code == 422

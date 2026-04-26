@@ -244,11 +244,11 @@ coverage report -m > coverage_summary.txt
 | Feedback | ✓ | ≥ 95% |
 | Notifications | ✓ | ≥ 95% |
 | Recommendations | ✓ | ≥ 95% |
-| Messages | ✓ (12 tests) | ≥ 95% |
-| Analytics | ✓ (12 tests) | ≥ 95% |
-| Profile Enhancements | ✓ (11 tests) | ≥ 90% |
-| Badges | ✓ (9 tests) | 100% |
-| **Total** | **243 tests** | **≥ 96%** |
+| Messages | ✓ | ≥ 95% |
+| Analytics | ✓ | ≥ 95% |
+| Profile Enhancements | ✓ | ≥ 90% |
+| Badges | ✓ | 100% |
+| **Total** | **251 tests** | **≥ 96%** |
  
 ---
 

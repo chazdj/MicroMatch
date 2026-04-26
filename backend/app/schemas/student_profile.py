@@ -38,7 +38,6 @@ class StudentProfileEnhance(BaseModel):
     All enhancement fields are optional — only provided fields are updated.
     """
     portfolio_links: Optional[str] = None   
-
     model_config = ConfigDict(from_attributes=True)
 
 class StudentProfileRead(StudentProfileBase):
