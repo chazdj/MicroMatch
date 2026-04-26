@@ -6,6 +6,7 @@ import api from "../api/api";
  *
  * Features:
  * - Fetch projects using JWT token from AuthContext
+ * - Client-side search: filters by title, description, and required_skills
  * - Allows students to apply to a project
  * - Displays loading and error states
  */
@@ -15,6 +16,7 @@ export default function ProjectsPage() {
   const [error, setError] = useState(null);
   const [applyingProjectId, setApplyingProjectId] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   /**
    * Fetch open projects from backend
@@ -69,6 +71,20 @@ export default function ProjectsPage() {
     }
   };
 
+  /**
+   * Filters the full project list against the current search query.
+   * Matches against title, description, and required_skills (case-insensitive).
+   */
+  const filteredProjects = projects.filter((project) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      project.title?.toLowerCase().includes(q) ||
+      project.description?.toLowerCase().includes(q) ||
+      project.required_skills?.toLowerCase().includes(q)
+    );
+  });
+
   if (loading)
     return <p style={{ textAlign: "center" }}>Loading projects...</p>;
 
@@ -79,17 +95,46 @@ export default function ProjectsPage() {
     <div style={{ maxWidth: "800px", margin: "50px auto" }}>
       <h1 style={{ textAlign: "center" }}>Open Projects</h1>
 
+      {/* Search Bar */}
+      <div style={{ margin: "20px 0" }}>
+        <input
+          type="text"
+          placeholder="Search by title, description, or skills…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            fontSize: "15px",
+            border: "1.5px solid #ccc",
+            borderRadius: "8px",
+            outline: "none",
+            boxSizing: "border-box",
+            transition: "border-color 0.2s",
+          }}
+          onFocus={(e) => (e.target.style.borderColor = "#fe8997")}
+          onBlur={(e) => (e.target.style.borderColor = "#ccc")}
+        />
+        {searchQuery && (
+          <p style={{ marginTop: "6px", fontSize: "13px", color: "#888" }}>
+            {filteredProjects.length === 0
+              ? "No projects match your search."
+              : `${filteredProjects.length} project${filteredProjects.length !== 1 ? "s" : ""} found`}
+          </p>
+        )}
+      </div>
+
       {successMessage && (
         <p style={{ textAlign: "center", color: "green" }}>
           {successMessage}
         </p>
       )}
 
-      {projects.length === 0 ? (
+      {filteredProjects.length === 0 && !searchQuery ? (
         <p>No projects found.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <li
               key={project.id}
               style={{
@@ -122,9 +167,7 @@ export default function ProjectsPage() {
                       : "pointer",
                 }}
               >
-                {applyingProjectId === project.id
-                  ? "Applying..."
-                  : "Apply"}
+                {applyingProjectId === project.id ? "Applying..." : "Apply"}
               </button>
             </li>
           ))}
