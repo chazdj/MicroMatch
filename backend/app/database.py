@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import os
 
 # PostgreSQL connection string
-DATABASE_URL = "postgresql://micromatch_user:micromatch_password@localhost:5432/micromatch"
+# DATABASE_URL = "postgresql://micromatch_user:micromatch_password@localhost:5432/micromatch"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
