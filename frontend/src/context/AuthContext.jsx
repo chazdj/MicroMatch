@@ -138,7 +138,7 @@ export function AuthProvider({ children }) {
   /**
    * Logs out a user
    */
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setEmail(null);
     setRole(null);
@@ -150,7 +150,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("role");
     localStorage.removeItem("name");
     navigate("/login");
-  };
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ token, email, role, name, login, logout, loading, profileComplete, setProfileComplete, checkProfileComplete}}>
