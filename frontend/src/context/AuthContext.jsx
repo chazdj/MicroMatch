@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       logout();
     }
-  }, [token]);
+  }, [token, logout]);
 
   /**
    * Logs in a user
