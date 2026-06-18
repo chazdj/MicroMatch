@@ -6,6 +6,12 @@ import os
 # DATABASE_URL = "postgresql://micromatch_user:micromatch_password@localhost:5432/micromatch"
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set")
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://")
+    
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
 
