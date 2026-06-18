@@ -61,65 +61,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Load token from localStorage when app starts
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedEmail = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedName = localStorage.getItem("name");
-
-    if (storedToken && !isTokenExpired(storedToken)) {
-      setToken(storedToken);
-      setEmail(storedEmail);
-      setRole(storedRole);
-      setName(storedName);
-    } else {
-      // If expired or invalid, clear everything
-      localStorage.removeItem("token");
-      localStorage.removeItem("email");
-      localStorage.removeItem("role");
-      localStorage.removeItem("name");
-    }
-
-    setLoading(false);
-  }, []);
-
-  // Once role is known, check profile completeness
-  useEffect(() => {
-    if (role && token && !profileChecked.current) {
-      profileChecked.current = true; // Prevent multiple checks
-      checkProfileComplete(role);
-    }
-  }, [role, token, checkProfileComplete]);
-
-  /**
-   * Automatically logout if token becomes expired
-   */
-  useEffect(() => {
-    if (!token) return;
-
-    try {
-      const decoded = jwtDecode(token);
-      const expirationTime = decoded.exp * 1000;
-      const currentTime = Date.now();
-      const timeLeft = expirationTime - currentTime;
-
-      if (timeLeft <= 0) {
-        logout();
-        return;
-      }
-
-      const timer = setTimeout(() => {
-        logout();
-      }, timeLeft);
-
-      return () => clearTimeout(timer);
-
-    } catch (error) {
-      logout();
-    }
-  }, [token, logout]);
-
+  
   /**
    * Logs in a user
    */
@@ -151,6 +93,66 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("name");
     navigate("/login");
   }, [navigate]);
+
+  // Load token from localStorage when app starts
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedEmail = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedName = localStorage.getItem("name");
+
+    if (storedToken && !isTokenExpired(storedToken)) {
+      setToken(storedToken);
+      setEmail(storedEmail);
+      setRole(storedRole);
+      setName(storedName);
+    } else {
+      // If expired or invalid, clear everything
+      localStorage.removeItem("token");
+      localStorage.removeItem("email");
+      localStorage.removeItem("role");
+      localStorage.removeItem("name");
+    }
+
+    setLoading(false);
+  }, []);
+
+  // Once role is known, check profile completeness
+  useEffect(() => {
+    if (role && token && !profileChecked.current) {
+      profileChecked.current = true; // Prevent multiple checks
+      checkProfileComplete(role);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, token]);
+
+  /**
+   * Automatically logout if token becomes expired
+   */
+  useEffect(() => {
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      const expirationTime = decoded.exp * 1000;
+      const currentTime = Date.now();
+      const timeLeft = expirationTime - currentTime;
+
+      if (timeLeft <= 0) {
+        logout();
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        logout();
+      }, timeLeft);
+
+      return () => clearTimeout(timer);
+
+    } catch (error) {
+      logout();
+    }
+  }, [token, logout]);
 
   return (
     <AuthContext.Provider value={{ token, email, role, name, login, logout, loading, profileComplete, setProfileComplete, checkProfileComplete}}>
