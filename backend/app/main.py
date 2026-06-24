@@ -22,7 +22,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",  # React dev server
     "http://127.0.0.1:3000",
-    "https://micro-match-tau.vercel.app/login"
+    "https://micro-match-tau.vercel.app",
 ]
 
 app.add_middleware(
