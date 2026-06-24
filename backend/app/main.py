@@ -35,6 +35,10 @@ app.add_middleware(
 
 app.add_middleware(LoggingMiddleware)
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 # Register routers
 app.include_router(auth.router)
 app.include_router(student_profile.router)
